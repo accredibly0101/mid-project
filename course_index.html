@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="style.css">
+<title>行動學習網站－首頁</title>
+
+</head>
+<body>
+<!-- 課程總覽頁面 -->
+<div class="course-overview">
+    <div class="main-section"></div>
+    <div class="info-button"></div>
+    <div id="announcements-container"></div> 
+    <div class="course-section">
+        <h2 class="course-title">課程總覽</h2>
+        <div class="course-list">
+            <a href="course_info.html" class="course-card">
+                <div class="course-photo-small" style="background-image: url(./img/course_cover_2.jpg);"></div>
+                <p style="font-size: 16px;">訊息與介面設計</p>
+                <p>共14堂/約1-2周</p>
+                <p class="progress">可觀看</p>
+            </a>
+            <a href="#" class="course-card">
+                <div class="course-photo-small"></div>
+                <p style="font-size: 16px;">教育統計概論</p>
+                <p>共4堂/約1-2周</p>
+                <p class="progress" style="color: rgb(158, 160, 160);">未開始</p>
+            </a>
+        </div>
+    </div>
+</div>
+<script type="module" src="./firebase/config.js"></script>
+<script type="module" src="./firebase/firebase-announcements.js"></script>
+</body>
+</html>

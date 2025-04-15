@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="style.css">
+<title>課程資訊－訊息與介面設計</title>
+
+</head>
+<body>
+<!-- 課程資訊頁面 -->
+<div class="course-info">
+    <a href="course_index.html" class="back-button">❮❮ 首頁</a>
+    <div class="course-header">
+        <div class="course-name">訊息與介面設計</div>
+        <div class="course-photo-big" alt="課程封面"></div>
+        <span>共14堂/約1-2周</span>
+    </div>
+    <div class="course-details">
+        <p><strong>課程介紹：</strong><br>「訊息與介面設計」為淡江教育科技學系的碩班必修課程，從網站心理學、架構規劃到介面與視覺設計，系統化介紹UI(User Interface)設計流程與UX(User Experience)的實務應用。適合0基礎的初學者掌握介面設計的核心概念。</p>
+        <p><strong>授課教師：</strong><br>淡江大學教育科技學系 沈俊毅 副教授</p>
+    </div>
+    <div class="lesson-list"><strong>課程清單</strong></div> 
+    <div class="lesson-container">
+        <div class="lesson-header">第一單元</div>
+        <div class="lesson-items">
+            <a href="course_video.html?lesson=1-1 網站心理學" class="lesson-item">1-1 網站心理學</a>
+            <a href="course_video.html?lesson=1-2 網格介面與布局" class="lesson-item">1-2 網格介面與布局</a>
+            <a href="course_video.html?lesson=1-3 網站架構圖" class="lesson-item">1-3 網站架構圖</a>
+            <a href="course_video.html?lesson=1-4 競業分析" class="lesson-item">1-4 競業分析</a>
+            <a href="course_video.html?lesson=1-5 人物模型" class="lesson-item">1-5 人物模型</a>
+        </div>
+    </div>
+    
+    <div class="lesson-container">
+        <div class="lesson-header">第二單元</div>
+        <div class="lesson-items">
+            <a href="course_video.html?lesson=2-1 網站目標與策略" class="lesson-item">2-1 網站目標與策略</a>
+            <a href="course_video.html?lesson=2-2 功能流程圖" class="lesson-item">2-2 功能流程圖</a>
+            <a href="course_video.html?lesson=2-3 概念模型" class="lesson-item">2-3 概念模型</a>
+            <a href="course_video.html?lesson=2-4 情感與大腦" class="lesson-item">2-4 情感與大腦</a>
+            <a href="course_video.html?lesson=2-5 介面元件設計" class="lesson-item">2-5 介面元件設計</a>
+        </div>
+    </div>
+    <div class="lesson-container">
+        <div class="lesson-header">第三單元</div>
+        <div class="lesson-items">
+            <a href="course_video.html?lesson=3-1 經驗價值與需求呈現" class="lesson-item">3-1 經驗價值與需求呈現</a>
+            <a href="course_video.html?lesson=3-2 內容清單" class="lesson-item">3-2 內容清單</a>
+            <a href="course_video.html?lesson=3-3 線框圖製作" class="lesson-item">3-3 線框圖製作</a>
+            <a href="course_video.html?lesson=3-4 視覺設計方法" class="lesson-item">3-4 視覺設計方法</a>
+        </div>
+    </div>
+</div>
+</body>
+<script>
+        document.querySelectorAll('.lesson-header').forEach(header => {
+            header.addEventListener('click', () => {
+                let items = header.nextElementSibling;
+                items.style.display = items.style.display === 'block' ? 'none' : 'block';
+            });
+        });
+</script>
+</html>
