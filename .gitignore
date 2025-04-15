@@ -1,0 +1,17 @@
+# 系統垃圾檔
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# VS Code 個人設定
+.vscode/
+
+# Firebase 設定檔（如果不想公開）
+firebase/config.js
+firebase-debug.log
+.firebase/
+
+# 環境變數檔（未來可能用到）
+.env
+# log 檔
+*.log

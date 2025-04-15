@@ -13,12 +13,7 @@
     <a href="course_info.html" class="back-button">❮❮ 課程資訊</a>
     <div class="course-name">訊息與介面設計</div>
     <div class="video-title">網站心理學</div>
-    <iframe class="video" id="player" 
-    src="https://www.youtube.com/embed/R5b3yt-bTL0?" 
-    title="YouTube video player" 
-    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"  
-    allowfullscreen>
-    </iframe>
+    <div class="video" id="player"></div>
     <div class="lesson-list"><strong>課程清單</strong></div> 
     <div class="lesson-container">
         <div class="lesson-header">第一單元</div>
@@ -58,7 +53,7 @@
 <!-- YouTube Iframe API -->
 <script src="https://www.youtube.com/iframe_api"></script>
 <!-- 影片追蹤 JS -->
-<script type="module" src="./video-tracker.js"></script>
+<script type="module" src="/firebase/video-tracker.js"></script>
 
 </body>
 </html>
