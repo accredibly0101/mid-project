@@ -47,13 +47,11 @@
         </div>
     </div>
 </div>
-<script src="main_js.js"></script>
-<!-- Firebase SDK -->
-<script type="module" src="/firebase/config.js"></script>
-<!-- YouTube Iframe API -->
+<!-- 這是正確的順序，將 YouTube Iframe API 放在其他腳本之前 -->
 <script src="https://www.youtube.com/iframe_api"></script>
-<!-- 影片追蹤 JS -->
+<script type="module" src="/firebase/config.js"></script>
 <script type="module" src="/firebase/video-tracker.js"></script>
+<script src="main_js.js"></script>
 
 </body>
 </html>

@@ -1,70 +1,68 @@
-import { db } from "/firebase/config.js";
-import { collection, query, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
+import { db } from '/firebase/config.js';
+import { collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
 
 let player;
 let currentVideoTitle = "";
-let watchStartTime = null;
+let watchStartTime = 0;
 
-// 🎬 YouTube Iframe API callback
-window.onYouTubeIframeAPIReady = function () {
-player = new YT.Player("player", {
-    height: "360",
-    width: "640",
-    videoId: "", // 初始無影片
-    events: {
-    onStateChange: onPlayerStateChange,
-    },
-});
-};
-
-// 🎥 處理播放事件
-function onPlayerStateChange(event) {
-const playerState = event.data;
-
-if (playerState === YT.PlayerState.PLAYING) {
-    watchStartTime = Date.now();
-}
-
-if (playerState === YT.PlayerState.PAUSED || playerState === YT.PlayerState.ENDED) {
-    if (watchStartTime) {
-    const watchedSeconds = Math.floor((Date.now() - watchStartTime) / 1000);
-    saveVideoLog(currentVideoTitle, watchedSeconds, playerState === YT.PlayerState.ENDED);
-    watchStartTime = null;
-    }
-}
-}
-
-// 📝 將觀看資料記錄進 Firestore
-async function saveVideoLog(title, duration, isFinished) {
-try {
-    await addDoc(collection(db, "videoLogs"), {
-    title: title,
-    watchedSeconds: duration,
-    isFinished: isFinished,
-    timestamp: serverTimestamp(),
-    userId: "anonymous", // 未來可改為 Firebase Auth 使用者 ID
+function onYouTubeIframeAPIReady() {
+    console.log("✅ Iframe API 已加載");
+    player = new YT.Player("player", {
+        height: "360",
+        width: "640",
+        videoId: "R5b3yt-bTL0",
+        events: {
+            onReady: onPlayerReady,
+            onStateChange: onPlayerStateChange
+        }
     });
-    console.log(`✅ 記錄影片「${title}」成功`);
-} catch (error) {
-    console.error("❌ 儲存失敗", error);
-}
 }
 
-// 🎯 點擊課程清單來切換影片
-document.querySelectorAll(".lesson-item").forEach(item => {
-item.addEventListener("click", () => {
-    const url = item.dataset.src;
-    const videoId = getYouTubeVideoId(url);
+// ⛳ 關鍵：手動將函式掛到 window 上
+window.onYouTubeIframeAPIReady = onYouTubeIframeAPIReady;
+
+// ✅ 點擊影片切換邏輯
+document.querySelectorAll('.lesson-item').forEach(item => {
+item.addEventListener('click', () => {
+    const videoUrl = item.dataset.src;
     currentVideoTitle = item.textContent.trim();
 
-    if (player && videoId) {
-    player.loadVideoById(videoId);
+    const urlObj = new URL(videoUrl);
+    const videoId = urlObj.pathname.split("/").pop().split("?")[0];
+
+    if (player && typeof player.loadVideoById === 'function') {
+    player.loadVideoById({ videoId, startSeconds: 0 });
+    console.log(`🎬 切換至：${currentVideoTitle}`);
+    } else {
+    console.warn("⚠️ Player 尚未就緒");
     }
 });
 });
 
-// 🧠 從 URL 擷取 YouTube Video ID
-function getYouTubeVideoId(url) {
-const match = url.match(/\/embed\/([^?]+)/);
-return match ? match[1] : null;
+function onPlayerStateChange(event) {
+const state = event.data;
+
+if (state === YT.PlayerState.PLAYING) {
+    watchStartTime = Date.now();
+    console.log("▶️ 播放開始");
+    } else if (state === YT.PlayerState.PAUSED || state === YT.PlayerState.ENDED) {
+    const watchTime = Math.floor((Date.now() - watchStartTime) / 1000);
+    const isEnded = state === YT.PlayerState.ENDED;
+    saveWatchData(watchTime, isEnded);
+    console.log(`⏹️ 播放暫停/結束，觀看秒數：${watchTime}`);
+}
+}
+
+function saveWatchData(watchTime, finished) {
+    addDoc(collection(db, "video_tracking"), {
+    userId: "anonymous",
+    videoTitle: currentVideoTitle,
+    watchTime: watchTime,
+    completed: finished,
+    timestamp: serverTimestamp()
+    }).then(() => {
+    console.log("✅ 已儲存觀看數據");
+    }).catch(err => {
+    console.error("❌ 儲存錯誤：", err);
+});
 }
