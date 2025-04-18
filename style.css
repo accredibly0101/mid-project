@@ -236,16 +236,6 @@ body {
 }
 
 /* 介面樣式3：觀看課程影片頁面、js的樣式改動*/
-.video {
-    display: block; /* 讓 iframe 占滿一行 */
-    max-width: 85vw;
-    height: 64vw;
-    margin-bottom:  10px; /* 確保 iframe 置中 */
-    border-radius: inherit;
-    border: 1px solid #ccc;
-    overflow: hidden;
-    aspect-ratio: 16/9;
-}
 
 .video-title {
     font-size: 18px;

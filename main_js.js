@@ -1,36 +1,83 @@
+
+import { db } from './firebase/config.js';
+import { collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
+
+
 // 連接youtube api並建立播放器
 var tag = document.createElement('script');
 tag.src = "https://www.youtube.com/iframe_api";
 var firstScriptTag = document.getElementsByTagName('script')[0];
 firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-    
-function onYouTubeIframeAPIReady() {
-        player = new YT.Player('player', {
-            height: '250px',
-            width: '100%',
-            videoId: 'R5b3yt-bTL0',
-            playerVars: {
+
+let player; // 宣告為全域變數
+// 建立播放器
+window.onYouTubeIframeAPIReady = function () {
+    player = new YT.Player('player', {
+        height: '250px',
+        width: '100%',
+        videoId: 'R5b3yt-bTL0',
+        playerVars: {
             'controls': 1,
             'fs': 1,
             'iv_load_policy': 3,
             'rel': 0,
             'modestbranding': 1,
             'playsinline': 0
-            },
-            events: {
+        },
+        events: {
             'onReady': onPlayerReady,
             'onStateChange': onPlayerStateChange
-            }
-        });
         }
-        
-        // 測試用的簡單處理事件（可暫時加上）
-        function onPlayerReady(event) {
-        console.log('Player is ready');
+    });
+};
+
+
+// 測試用的簡單處理事件（可暫時加上）
+function onPlayerReady(event) {
+console.log('Player is ready');
+}
+
+let sessionStartTime = null;
+function onPlayerStateChange(event) {
+    const videoId = player.getVideoData().video_id;
+    const videoTitle = player.getVideoData().title;
+
+    // 播放開始
+    if (event.data === YT.PlayerState.PLAYING) {
+        sessionStartTime = Date.now(); // 記錄開始時間
+    }
+
+    // 播放結束 or 暫停
+    if (event.data === YT.PlayerState.ENDED || event.data === YT.PlayerState.PAUSED) {
+        if (sessionStartTime) {
+            const sessionEndTime = Date.now();
+            const duration = Math.floor((sessionEndTime - sessionStartTime) / 1000); // 秒
+
+            // 儲存到 Firestore
+            saveWatchDataToFirestore(videoId, videoTitle, duration);
+
+            sessionStartTime = null; // 重設時間
         }
-        function onPlayerStateChange(event) {
-        console.log('Player state changed:', event.data);
-        }
+    }
+}
+
+async function saveWatchDataToFirestore(videoId, videoTitle, duration) {
+    try {
+        const watchData = {
+            videoId,
+            videoTitle,
+            duration,
+            timestamp: serverTimestamp(),
+            user: 'anonymous' // 目前先匿名紀錄
+        };
+
+        await addDoc(collection(db, "video_watch_logs"), watchData);
+        console.log("✅ Watch data saved:", watchData);
+    } catch (e) {
+        console.error("❌ Error saving watch data:", e);
+    }
+}
+
 
 document.addEventListener("DOMContentLoaded", function () {
     const urlParams = new URLSearchParams(window.location.search);
@@ -41,12 +88,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // 等待 YouTube Player 初始化完畢再繼續操作
     function waitForPlayerReady(callback) {
-        if (window.player && typeof player.loadVideoById === "function") {
-            callback();
+        if (player && typeof player.loadVideoById === "function") {
+            callback();  // 播放器已經準備好，執行回調
         } else {
-            setTimeout(() => waitForPlayerReady(callback), 100);
+            setTimeout(() => waitForPlayerReady(callback), 100);  // 每 100ms 檢查一次
         }
     }
+    
+    
 
     // 輔助函式：從 data-src 中擷取 videoId（只要 ID）
     function extractVideoId(url) {
@@ -76,27 +125,42 @@ document.addEventListener("DOMContentLoaded", function () {
     lessonItems.forEach(item => {
         item.addEventListener("click", function (event) {
             event.preventDefault(); // 防止跳轉
-
+    
             // 移除所有 active
             lessonItems.forEach(i => i.classList.remove("active"));
-
+    
             // 設定當前 active + 顯示標題
             this.classList.add("active");
             videoTitle.textContent = this.textContent.trim();
-
-            // 切換影片
+    
             const videoId = extractVideoId(this.getAttribute("data-src"));
-            if (videoId && window.player) {
-                player.loadVideoById(videoId);
+    
+            // 確保 YouTube 播放器已準備好
+            waitForPlayerReady(() => {
+                if (videoId) {
+                    player.loadVideoById(videoId);
+                }
+            });
+        });
+    });
+    
+    
+
+    // 課程清單收合
+// 課程清單收合
+document.querySelectorAll(".lesson-header").forEach(header => {
+    header.addEventListener("click", function () {
+        const currentItems = this.nextElementSibling;
+    
+        // 收起所有 lesson-items
+        document.querySelectorAll(".lesson-items").forEach(items => {
+            if (items !== currentItems) {
+                items.style.display = "none";
             }
         });
-    });
-
-    // 3️⃣ 展開/收合課程單元
-    document.querySelectorAll(".lesson-header").forEach(header => {
-        header.addEventListener("click", function () {
-            let items = this.nextElementSibling;
-            items.style.display = items.style.display === "block" ? "none" : "block";
-        });
+    
+        // 切換目前這一個
+        currentItems.style.display = currentItems.style.display === "block" ? "none" : "block";
     });
 });
+})
