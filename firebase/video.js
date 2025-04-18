@@ -1,5 +1,5 @@
 
-import { db } from './firebase/config.js';
+import { db } from './config.js';
 import { collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
 
 
@@ -71,10 +71,10 @@ async function saveWatchDataToFirestore(videoId, videoTitle, duration) {
             user: 'anonymous' // 目前先匿名紀錄
         };
 
-        await addDoc(collection(db, "video_watch_logs"), watchData);
-        console.log("✅ Watch data saved:", watchData);
+        await addDoc(collection(db, "video_watch_logs_test"), watchData);
+        console.log("✅數據儲存:", watchData);
     } catch (e) {
-        console.error("❌ Error saving watch data:", e);
+        console.error("❌數據儲存失敗:", e);
     }
 }
 
@@ -164,3 +164,24 @@ document.querySelectorAll(".lesson-header").forEach(header => {
     });
 });
 })
+
+
+let lastPlayedTime = 0; // 記錄影片上次播放的時間
+
+// 當頁面焦點變動時（例如切換分頁、最小化）
+document.addEventListener("visibilitychange", function () {
+    if (document.visibilityState === "hidden") {
+        // 當頁面不再可見時，暫停影片並記錄當前時間
+        if (player && typeof player.getCurrentTime === "function") {
+            lastPlayedTime = player.getCurrentTime(); // 記錄當前播放時間
+            player.pauseVideo(); // 暫停影片
+        }
+    } else if (document.visibilityState === "visible") {
+        // 當頁面恢復可見時，繼續播放影片從上次播放的時間
+        if (player && typeof player.seekTo === "function" && lastPlayedTime > 0) {
+            player.seekTo(lastPlayedTime); // 從上次記錄的時間繼續播放
+            player.playVideo(); // 播放影片
+        }
+    }
+});
+
