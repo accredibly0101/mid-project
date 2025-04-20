@@ -1,82 +1,122 @@
-
 import { db } from './config.js';
-import { collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
+import {doc, getDoc, setDoc, serverTimestamp} from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
 
+// 使用者名稱
+const username = "anonymous";
+const pageName = window.location.pathname.split('/').pop(); // course_video.html
+const userRef = doc(db, "users", username);
 
-// 連接youtube api並建立播放器
+// 1️⃣ 頁面停留時間紀錄
+let pageStartTime = Date.now();
+window.addEventListener('beforeunload', async () => {
+const pageEndTime = Date.now();
+const pageDuration = Math.floor((pageEndTime - pageStartTime) / 1000); // 秒
+
+try {
+const docSnap = await getDoc(userRef);
+let data = docSnap.exists() ? docSnap.data() : {};
+
+if (!data.pageTimes) data.pageTimes = {};
+if (!data.pageTimes[pageName]) data.pageTimes[pageName] = 0;
+
+data.pageTimes[pageName] += pageDuration;
+data.lastUpdate = serverTimestamp();
+
+await setDoc(userRef, data);
+console.log(`✅ 頁面停留紀錄完成：${pageName} 停留 ${pageDuration} 秒`);
+} catch (e) {
+console.error("❌ 頁面停留儲存失敗", e);
+}
+});
+
+// 2️⃣ YouTube Player 設定
 var tag = document.createElement('script');
 tag.src = "https://www.youtube.com/iframe_api";
-var firstScriptTag = document.getElementsByTagName('script')[0];
-firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+document.getElementsByTagName('script')[0].parentNode.insertBefore(tag, null);
 
-let player; // 宣告為全域變數
-// 建立播放器
+let player;
+let sessionStartTime = null;
+let videoDuration = 0;
+let videoCompleted = false;
+let currentVideoId = "";
+let currentVideoTitle = "";
+
+// YouTube 影片準備好時
 window.onYouTubeIframeAPIReady = function () {
-    player = new YT.Player('player', {
-        height: '250px',
-        width: '100%',
-        videoId: 'R5b3yt-bTL0',
-        playerVars: {
-            'controls': 1,
-            'fs': 1,
-            'iv_load_policy': 3,
-            'rel': 0,
-            'modestbranding': 1,
-            'playsinline': 0
-        },
-        events: {
-            'onReady': onPlayerReady,
-            'onStateChange': onPlayerStateChange
-        }
-    });
+player = new YT.Player('player', {
+height: '250px',
+width: '100%',
+videoId: 'R5b3yt-bTL0',
+playerVars: {
+    controls: 1,
+    fs: 1,
+    iv_load_policy: 3,
+    rel: 0,
+    modestbranding: 1,
+    playsinline: 0
+},
+events: {
+    'onReady': onPlayerReady,
+    'onStateChange': onPlayerStateChange
+}
+});
 };
 
-
-// 測試用的簡單處理事件（可暫時加上）
 function onPlayerReady(event) {
-console.log('Player is ready');
+console.log('✅ YouTube Player Ready');
 }
 
-let sessionStartTime = null;
+// 3️⃣ 播放狀態變更處理
 function onPlayerStateChange(event) {
-    const videoId = player.getVideoData().video_id;
-    const videoTitle = player.getVideoData().title;
+currentVideoId = player.getVideoData().video_id;
+currentVideoTitle = player.getVideoData().title;
 
-    // 播放開始
-    if (event.data === YT.PlayerState.PLAYING) {
-        sessionStartTime = Date.now(); // 記錄開始時間
-    }
-
-    // 播放結束 or 暫停
-    if (event.data === YT.PlayerState.ENDED || event.data === YT.PlayerState.PAUSED) {
-        if (sessionStartTime) {
-            const sessionEndTime = Date.now();
-            const duration = Math.floor((sessionEndTime - sessionStartTime) / 1000); // 秒
-
-            // 儲存到 Firestore
-            saveWatchDataToFirestore(videoId, videoTitle, duration);
-
-            sessionStartTime = null; // 重設時間
-        }
-    }
+if (event.data === YT.PlayerState.PLAYING) {
+sessionStartTime = Date.now();
+videoDuration = player.getDuration(); // 總長
 }
 
-async function saveWatchDataToFirestore(videoId, videoTitle, duration) {
-    try {
-        const watchData = {
-            videoId,
-            videoTitle,
-            duration,
-            timestamp: serverTimestamp(),
-            user: 'anonymous' // 目前先匿名紀錄
-        };
+if (event.data === YT.PlayerState.ENDED || event.data === YT.PlayerState.PAUSED) {
+if (sessionStartTime) {
+    const endTime = Date.now();
+    const watchTime = Math.floor((endTime - sessionStartTime) / 1000);
+    const percentWatched = watchTime / videoDuration;
 
-        await addDoc(collection(db, "video_watch_logs_test"), watchData);
-        console.log("✅數據儲存:", watchData);
-    } catch (e) {
-        console.error("❌數據儲存失敗:", e);
-    }
+    videoCompleted = percentWatched >= 0.9;
+
+    saveVideoData(watchTime, videoCompleted);
+
+    sessionStartTime = null;
 }
+}
+}
+
+// 4️⃣ 儲存影片資料至 Firestore
+async function saveVideoData(watchTime, completed) {
+try {
+const docSnap = await getDoc(userRef);
+let data = docSnap.exists() ? docSnap.data() : {};
+
+if (!data.videos) data.videos = {};
+if (!data.videos[currentVideoId]) {
+    data.videos[currentVideoId] = {
+    title: currentVideoTitle,
+    duration: 0,
+    completed: false
+    };
+}
+
+data.videos[currentVideoId].duration += watchTime;
+if (completed) data.videos[currentVideoId].completed = true;
+data.lastUpdate = serverTimestamp();
+
+await setDoc(userRef, data);
+console.log("✅ 影片紀錄完成：", currentVideoId, watchTime, completed);
+} catch (e) {
+console.error("❌ 儲存影片紀錄失敗：", e);
+}
+}
+
 
 
 document.addEventListener("DOMContentLoaded", function () {
