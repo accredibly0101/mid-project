@@ -9,23 +9,25 @@ const userRef = doc(db, "users", username);
 // 1️⃣ 頁面停留時間紀錄
 let pageStartTime = Date.now();
 window.addEventListener('beforeunload', async () => {
-const pageEndTime = Date.now();
-const pageDuration = Math.floor((pageEndTime - pageStartTime) / 1000); // 秒
+    const pageEndTime = Date.now();
+    const pageDuration = Math.floor((pageEndTime - pageStartTime) / 1000); // 秒
 
-try {
-const docSnap = await getDoc(userRef);
-let data = docSnap.exists() ? docSnap.data() : {};
+    try {
+    const docSnap = await getDoc(userRef);
+    let data = docSnap.exists() ? docSnap.data() : {};
 
-if (!data.pageTimes) data.pageTimes = {};
-if (!data.pageTimes[pageName]) data.pageTimes[pageName] = 0;
+    if (!data.pageTimes) data.pageTimes = {};
+    if (!data.pageTimes[pageName]) data.pageTimes[pageName] = 0;
 
-data.pageTimes[pageName] += pageDuration;
-data.lastUpdate = serverTimestamp();
+    data.pageTimes[pageName] += pageDuration;
+    data.lastUpdate = serverTimestamp();
 
-await setDoc(userRef, data);
-console.log(`✅ 頁面停留紀錄完成：${pageName} 停留 ${pageDuration} 秒`);
-} catch (e) {
-console.error("❌ 頁面停留儲存失敗", e);
+    await setDoc(userRef, data);
+    console.log(`✅ 頁面停留紀錄完成：${pageName} 停留 ${pageDuration} 秒`);
+    } catch (e) {
+    console.error("❌ 頁面停留儲存失敗", e);
+
+    updateLessonProgressUI();
 }
 });
 
@@ -66,60 +68,111 @@ function onPlayerReady(event) {
 console.log('✅ YouTube Player Ready');
 }
 
+
 // 3️⃣ 播放狀態變更處理
 function onPlayerStateChange(event) {
-currentVideoId = player.getVideoData().video_id;
-currentVideoTitle = player.getVideoData().title;
-
 if (event.data === YT.PlayerState.PLAYING) {
-sessionStartTime = Date.now();
-videoDuration = player.getDuration(); // 總長
+    sessionStartTime = Date.now();
+    videoDuration = player.getDuration();
+
+    currentVideoId = player.getVideoData().video_id;
+    currentVideoTitle = player.getVideoData().title;
+
+    console.log(`🎬 Playing: ${currentVideoTitle}`);
 }
 
 if (event.data === YT.PlayerState.ENDED || event.data === YT.PlayerState.PAUSED) {
-if (sessionStartTime) {
+    if (sessionStartTime) {
     const endTime = Date.now();
     const watchTime = Math.floor((endTime - sessionStartTime) / 1000);
-    const percentWatched = watchTime / videoDuration;
 
-    videoCompleted = percentWatched >= 0.9;
-
-    saveVideoData(watchTime, videoCompleted);
-
+    saveVideoData(watchTime);
     sessionStartTime = null;
-}
+    }
 }
 }
 
 // 4️⃣ 儲存影片資料至 Firestore
-async function saveVideoData(watchTime, completed) {
+async function saveVideoData(watchTime) {
 try {
-const docSnap = await getDoc(userRef);
-let data = docSnap.exists() ? docSnap.data() : {};
+    const docSnap = await getDoc(userRef);
+    let data = docSnap.exists() ? docSnap.data() : {};
 
-if (!data.videos) data.videos = {};
-if (!data.videos[currentVideoId]) {
+    if (!data.videos) data.videos = {};
+    if (!data.videos[currentVideoId]) {
     data.videos[currentVideoId] = {
-    title: currentVideoTitle,
-    duration: 0,
-    completed: false
+        title: currentVideoTitle || player.getVideoData().title || "未知標題",
+        duration: 0,
+        completed: false
     };
+    } else {
+    // 補標題
+    if (!data.videos[currentVideoId].title || data.videos[currentVideoId].title === "") {
+        data.videos[currentVideoId].title = currentVideoTitle || player.getVideoData().title || "未知標題";
+        console.log(`🔁 已補上影片標題：${data.videos[currentVideoId].title}`);
+    }
+    }
+
+    // 🧠 加總但不超過總長度
+    const previousDuration = data.videos[currentVideoId].duration || 0;
+    const newDuration = previousDuration + watchTime;
+    const cappedDuration = Math.min(newDuration, videoDuration);
+
+    data.videos[currentVideoId].duration = cappedDuration;
+    data.videos[currentVideoId].percentWatched = Math.round((cappedDuration / videoDuration) * 100);
+
+
+    // ✅ 若超過 80%，就算完成
+    const percentWatched = cappedDuration / videoDuration;
+    if (percentWatched >= 0.8) {
+    data.videos[currentVideoId].completed = true;
+    }
+
+    data.lastUpdate = serverTimestamp();
+
+    await setDoc(userRef, data);
+    updateLessonProgressUI(); 
+    console.log("✅ 影片紀錄完成：", currentVideoId, cappedDuration, data.videos[currentVideoId].completed);
+    } catch (e) {
+        console.error("❌ 儲存影片紀錄失敗：", e);
+    }
 }
 
-data.videos[currentVideoId].duration += watchTime;
-if (completed) data.videos[currentVideoId].completed = true;
-data.lastUpdate = serverTimestamp();
+// 添加百分比進度UI
+async function updateLessonProgressUI() {
+const docSnap = await getDoc(userRef);
+if (!docSnap.exists()) return;
 
-await setDoc(userRef, data);
-console.log("✅ 影片紀錄完成：", currentVideoId, watchTime, completed);
-} catch (e) {
-console.error("❌ 儲存影片紀錄失敗：", e);
-}
-}
+const data = docSnap.data();
+const videos = data.videos || {};
 
+const lessonItems = document.querySelectorAll(".lesson-item");
+lessonItems.forEach(item => {
+    const url = new URL(item.dataset.src);
+    const videoId = url.pathname.split("/")[2]; // 解析出 videoId
+    const info = videos[videoId];
+
+    // 移除舊的百分比（避免重複顯示）
+    const oldSpan = item.querySelector(".progress-percent");
+    if (oldSpan) oldSpan.remove();
+
+    if (info && info.percentWatched !== undefined) {
+    const percent = info.percentWatched;
+    const percentTag = document.createElement("span");
+    percentTag.className = "progress-percent";
+    percentTag.textContent = `（${percent}%）`;
+    percentTag.style.fontSize = "0.85em";
+    percentTag.style.color = percent >= 80 ? "green" : "gray";
+    item.appendChild(percentTag);
+    }
+});
+}
 
 
 document.addEventListener("DOMContentLoaded", function () {
+    
+    updateLessonProgressUI();
+
     const urlParams = new URLSearchParams(window.location.search);
     const lessonName = urlParams.get("lesson");
 
