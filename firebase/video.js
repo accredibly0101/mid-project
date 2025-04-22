@@ -140,32 +140,66 @@ try {
 
 // 添加百分比進度UI
 async function updateLessonProgressUI() {
-const docSnap = await getDoc(userRef);
-if (!docSnap.exists()) return;
+    const docSnap = await getDoc(userRef);
+    if (!docSnap.exists()) return;
 
-const data = docSnap.data();
-const videos = data.videos || {};
+    const data = docSnap.data();
+    const videos = data.videos || {};
 
-const lessonItems = document.querySelectorAll(".lesson-item");
-lessonItems.forEach(item => {
-    const url = new URL(item.dataset.src);
-    const videoId = url.pathname.split("/")[2]; // 解析出 videoId
-    const info = videos[videoId];
+    const lessonItems = document.querySelectorAll(".lesson-item");
+    
+    lessonItems.forEach(item => {
+        const url = new URL(item.dataset.src);
+        const videoId = url.pathname.split("/")[2]; // 解析出 videoId
+        const info = videos[videoId];
 
-    // 移除舊的百分比（避免重複顯示）
-    const oldSpan = item.querySelector(".progress-percent");
-    if (oldSpan) oldSpan.remove();
+        item.style.position = "relative";
 
-    if (info && info.percentWatched !== undefined) {
-    const percent = info.percentWatched;
-    const percentTag = document.createElement("span");
-    percentTag.className = "progress-percent";
-    percentTag.textContent = `（${percent}%）`;
-    percentTag.style.fontSize = "0.85em";
-    percentTag.style.color = percent >= 80 ? "green" : "gray";
-    item.appendChild(percentTag);
-    }
-});
+        // 移除舊的百分比（避免重複顯示）
+        const oldSpan = item.querySelector(".progress-percent");
+        if (oldSpan) oldSpan.remove();
+
+        // 預設原始進度是0%
+        const percent = (info && info.percentWatched !== undefined) ? info.percentWatched : 0;
+        // // 建立百分比UI(文字)
+        // const percentTag = document.createElement("span");
+        // percentTag.className = "progress-percent";
+        // percentTag.textContent = `${percent}%`;
+        // percentTag.style.fontSize = "0.85em";
+        // percentTag.style.color = percent >= 80 ? "green" : "gray";
+        // percentTag.style.fontWeight = percent >= 80 ? "700" : "normal";
+        // percentTag.style.position = "absolute";
+        // percentTag.style.right = "10px";
+        // percentTag.style.top = "50%";
+        // percentTag.style.transform = "translateY(-50%)";
+        // item.appendChild(percentTag);
+
+        // 建立百分比UI(圖形)
+        const progressWrapper = document.createElement("div");
+        progressWrapper.className = "circle-progress";
+        progressWrapper.innerHTML = `
+        <svg viewBox="0 0 36 36" class="circular-chart ${percent >= 80 ? 'green' : 'gray'}">
+        <path class="circle-bg"
+                d="M18 2.0845
+                    a 15.9155 15.9155 0 0 1 0 31.831
+                    a 15.9155 15.9155 0 0 1 0 -31.831"/>
+        <path class="circle"
+                stroke-dasharray="${percent}, 100"
+                d="M18 2.0845
+                    a 15.9155 15.9155 0 0 1 0 31.831
+                    a 15.9155 15.9155 0 0 1 0 -31.831"/>
+        </svg>
+    `;
+    
+        progressWrapper.style.position = "absolute";
+        progressWrapper.style.right = "10px";
+        progressWrapper.style.top = "50%";
+        progressWrapper.style.transform = "translateY(-50%)";
+        
+        item.appendChild(progressWrapper);
+        
+        
+    });
 }
 
 
