@@ -255,38 +255,38 @@ body {
 
 /* 介面樣式：百分比UI的圖形 */
 .circle-progress {
-width: 25px;
-height: 25px;
+    width: 25px;
+    height: 25px;
 }
 
 .circular-chart {
-display: block;
-margin: auto;
-max-width: 100%;
-max-height: 100%;
+    display: block;
+    margin: auto;
+    max-width: 100%;
+    max-height: 100%;
 }
 
 .circle-bg {
-fill: none;
-stroke: #eee;
-stroke-width: 3.8;
+    fill: none;
+    stroke: #eee;
+    stroke-width: 6;
 }
 
 .circle {
-fill: none;
-stroke-width: 5;
-stroke-linecap: round;
-transform: rotate(-90deg);
-transform-origin: center;
-stroke: #4caf50; /* 預設為綠色 */
-transition: stroke-dasharray 0.3s ease;
+    fill: none;
+    stroke-width: 6;
+    stroke-linecap: round;
+    transform: rotate(-90deg);
+    transform-origin: center;
+    stroke: #4caf50; /* 預設為綠色 */ 
+    transition: stroke-dasharray 0.3s ease;
 }
 
 .circular-chart.gray .circle {
-stroke: #bbb;
+    stroke: #bbb;
 }
 
 .circular-chart.green .circle {
-stroke: #4caf50;
+    stroke: #4caf50;
 }
 

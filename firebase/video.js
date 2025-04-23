@@ -6,31 +6,6 @@ const username = "anonymous";
 const pageName = window.location.pathname.split('/').pop(); // course_video.html
 const userRef = doc(db, "users", username);
 
-// 1️⃣ 頁面停留時間紀錄
-let pageStartTime = Date.now();
-window.addEventListener('beforeunload', async () => {
-    const pageEndTime = Date.now();
-    const pageDuration = Math.floor((pageEndTime - pageStartTime) / 1000); // 秒
-
-    try {
-    const docSnap = await getDoc(userRef);
-    let data = docSnap.exists() ? docSnap.data() : {};
-
-    if (!data.pageTimes) data.pageTimes = {};
-    if (!data.pageTimes[pageName]) data.pageTimes[pageName] = 0;
-
-    data.pageTimes[pageName] += pageDuration;
-    data.lastUpdate = serverTimestamp();
-
-    await setDoc(userRef, data);
-    console.log(`✅ 頁面停留紀錄完成：${pageName} 停留 ${pageDuration} 秒`);
-    } catch (e) {
-    console.error("❌ 頁面停留儲存失敗", e);
-
-    updateLessonProgressUI();
-}
-});
-
 // 2️⃣ YouTube Player 設定
 var tag = document.createElement('script');
 tag.src = "https://www.youtube.com/iframe_api";
