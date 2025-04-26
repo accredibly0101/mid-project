@@ -1,4 +1,4 @@
-import { db } from './config.js';
+import { db, getUsername } from './config.js';
 import {
 doc,
 setDoc,
@@ -7,11 +7,11 @@ increment,
 FieldPath
 } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
 
-const username = "anonymous";
+const username = getUsername();
+// const username = "anonymous";
 const pageName = window.location.pathname.split("/").pop().replace(".html", "");
 const today = new Date().toISOString().split("T")[0];
 const pageStartTime = Date.now();
-
 const userDocRef = doc(db, "users", username);
 
 async function savePageTime(duration) {

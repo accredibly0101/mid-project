@@ -1,9 +1,9 @@
-import { db } from './config.js';
+import { db, getUsername } from './config.js';
 import {doc, getDoc, setDoc, serverTimestamp} from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
 
 // 使用者名稱
-const username = "anonymous";
-const pageName = window.location.pathname.split('/').pop(); // course_video.html
+const username = getUsername();
+// const username = "anonymous";
 const userRef = doc(db, "users", username);
 
 // 2️⃣ YouTube Player 設定
@@ -136,18 +136,6 @@ async function updateLessonProgressUI() {
 
         // 預設原始進度是0%
         const percent = (info && info.percentWatched !== undefined) ? info.percentWatched : 0;
-        // // 建立百分比UI(文字)
-        // const percentTag = document.createElement("span");
-        // percentTag.className = "progress-percent";
-        // percentTag.textContent = `${percent}%`;
-        // percentTag.style.fontSize = "0.85em";
-        // percentTag.style.color = percent >= 80 ? "green" : "gray";
-        // percentTag.style.fontWeight = percent >= 80 ? "700" : "normal";
-        // percentTag.style.position = "absolute";
-        // percentTag.style.right = "10px";
-        // percentTag.style.top = "50%";
-        // percentTag.style.transform = "translateY(-50%)";
-        // item.appendChild(percentTag);
 
         // 建立百分比UI(圖形)
         const progressWrapper = document.createElement("div");
@@ -175,6 +163,19 @@ async function updateLessonProgressUI() {
         
         
     });
+
+            // // 建立百分比UI(文字)
+        // const percentTag = document.createElement("span");
+        // percentTag.className = "progress-percent";
+        // percentTag.textContent = `${percent}%`;
+        // percentTag.style.fontSize = "0.85em";
+        // percentTag.style.color = percent >= 80 ? "green" : "gray";
+        // percentTag.style.fontWeight = percent >= 80 ? "700" : "normal";
+        // percentTag.style.position = "absolute";
+        // percentTag.style.right = "10px";
+        // percentTag.style.top = "50%";
+        // percentTag.style.transform = "translateY(-50%)";
+        // item.appendChild(percentTag);
 }
 
 
