@@ -278,7 +278,7 @@ body {
     stroke-linecap: round;
     transform: rotate(-90deg);
     transform-origin: center;
-    stroke: #4caf50; /* 預設為綠色 */ 
+    stroke: #439cfb; /* 預設為綠色 */ 
     transition: stroke-dasharray 0.3s ease;
 }
 
