@@ -22,7 +22,7 @@ window.onYouTubeIframeAPIReady = function () {
 player = new YT.Player('player', {
 height: '250px',
 width: '100%',
-videoId: 'R5b3yt-bTL0',
+videoId: '',
 playerVars: {
     controls: 1,
     fs: 1,
@@ -104,7 +104,7 @@ try {
 
     data.lastUpdate = serverTimestamp();
 
-    await setDoc(userRef, data);
+    await setDoc(userRef, { videos: data.videos, lastUpdate: data.lastUpdate }, { merge: true });
     updateLessonProgressUI(); 
     console.log("✅ 影片紀錄完成：", currentVideoId, cappedDuration, data.videos[currentVideoId].completed);
     } catch (e) {
@@ -112,95 +112,81 @@ try {
     }
 }
 
-
 document.addEventListener("DOMContentLoaded", function () {
-    
     updateLessonProgressUI();
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const lessonName = urlParams.get("lesson");
+    // 👉 優先從 localStorage 讀取資料
+    const lessonName = localStorage.getItem("selectedLesson");
+    const videoIdFromStorage = localStorage.getItem("selectedVideoId");
+
+    console.log("Lesson Name: ", lessonName);
+    console.log("Video ID: ", videoIdFromStorage);
 
     const lessonItems = document.querySelectorAll(".lesson-item");
     const videoTitle = document.querySelector(".video-title");
 
-    // 等待 YouTube Player 初始化完畢再繼續操作
     function waitForPlayerReady(callback) {
         if (player && typeof player.loadVideoById === "function") {
-            callback();  // 播放器已經準備好，執行回調
+            console.log("✅ YouTube Player Ready");
+            callback();
         } else {
-            setTimeout(() => waitForPlayerReady(callback), 100);  // 每 100ms 檢查一次
+            console.log("⌛ Player is not ready yet.");
+            setTimeout(() => waitForPlayerReady(callback), 100);
         }
     }
-    
-    
 
-    // 輔助函式：從 data-src 中擷取 videoId（只要 ID）
-    function extractVideoId(url) {
-        const match = url.match(/\/embed\/([^\?]+)/);
-        return match ? match[1] : null;
-    }
-
-    // 1️⃣ 根據 URL 參數預設載入影片
     waitForPlayerReady(() => {
-        lessonItems.forEach(item => {
-            if (lessonName && item.textContent.trim() === lessonName) {
-                item.classList.add("active");
+        if (videoIdFromStorage) {
+            player.loadVideoById(videoIdFromStorage);
+            if (lessonName) {
                 videoTitle.textContent = lessonName;
-                const videoId = extractVideoId(item.getAttribute("data-src"));
-                if (videoId) player.loadVideoById(videoId);
+            }
 
-                // 展開課程單元
-                let parentItems = item.closest(".lesson-items");
-                if (parentItems) {
-                    parentItems.style.display = "block";
+            lessonItems.forEach(item => {
+                const itemText = item.textContent.trim();
+                if (itemText === lessonName) {
+                    item.classList.add("active");
+                    const parentItems = item.closest(".lesson-items");
+                    if (parentItems) {
+                        parentItems.style.display = "block";
+                    }
                 }
+            });
+
+            // ❌ 載入後清除 localStorage（避免干擾下一次跳轉）
+            localStorage.removeItem("selectedLesson");
+            localStorage.removeItem("selectedVideoId");
+
+        } else {
+            // 若 localStorage 無資料，載入預設第一個影片
+            if (lessonItems.length > 0) {
+                const firstItem = lessonItems[0];
+                const firstVideoId = extractVideoId(firstItem.getAttribute("data-src"));
+                if (firstVideoId) player.loadVideoById(firstVideoId);
+                videoTitle.textContent = firstItem.textContent.trim();
+                firstItem.classList.add("active");
+            }
+        }
+    });
+
+    // 點擊課程項目時載入影片
+    lessonItems.forEach(item => {
+        item.addEventListener("click", function () {
+            const newVideoId = extractVideoId(this.getAttribute("data-src"));
+            if (newVideoId) {
+                player.loadVideoById(newVideoId);
+                videoTitle.textContent = this.textContent.trim();
+                lessonItems.forEach(i => i.classList.remove("active"));
+                this.classList.add("active");
             }
         });
     });
+});
 
-    // 2️⃣ 點擊切換影片
-    lessonItems.forEach(item => {
-        item.addEventListener("click", function (event) {
-            event.preventDefault(); // 防止跳轉
-    
-            // 移除所有 active
-            lessonItems.forEach(i => i.classList.remove("active"));
-    
-            // 設定當前 active + 顯示標題
-            this.classList.add("active");
-            videoTitle.textContent = this.textContent.trim();
-    
-            const videoId = extractVideoId(this.getAttribute("data-src"));
-    
-            // 確保 YouTube 播放器已準備好
-            waitForPlayerReady(() => {
-                if (videoId) {
-                    player.loadVideoById(videoId);
-                }
-            });
-        });
-    });
-    
-    
-
-// 課程清單收合
-// document.querySelectorAll(".lesson-header").forEach(header => {
-//     header.addEventListener("click", function () {
-//         const currentItems = this.nextElementSibling;
-    
-//         // 收起所有 lesson-items
-//         document.querySelectorAll(".lesson-items").forEach(items => {
-//             if (items !== currentItems) {
-//                 items.style.display = "none";
-//             }
-//         });
-    
-//         // 切換目前這一個
-//         currentItems.style.display = currentItems.style.display === "block" ? "none" : "block";
-//     });
-// });
-
-})
+function extractVideoId(url) {
+    const match = url.match(/\/embed\/([^\?]+)/);
+    return match ? match[1] : null;
+}
 
 
 let lastPlayedTime = 0; // 記錄影片上次播放的時間
@@ -221,4 +207,3 @@ document.addEventListener("visibilitychange", function () {
         }
     }
 });
-

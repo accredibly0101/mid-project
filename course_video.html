@@ -1,18 +1,19 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="style.css">
-<title>平台課程影片</title>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>平台課程影片</title>
+    <script type="module" src="/firebase/video.js"></script>
+    <script type="module" src="/firebase/config.js"></script>
 </head>
 <body>
 <!-- 課程資訊頁面 -->
 <div class="course-info">
     <a href="course_info.html" class="back-button">❮❮ 課程資訊</a>
     <div class="course-name">訊息與介面設計</div>
-    <div class="video-title">網站心理學</div>
+    <div class="video-title">課程標題</div>
     <div id="player"></div>
     <div class="lesson-list"><strong>課程清單</strong></div> 
     <div class="lesson-container">
@@ -25,7 +26,7 @@
             <div class="lesson-item" data-src="https://www.youtube.com/embed/3MCbC9y7OqU">1-5 人物模型</div>
         </div>
     </div>
-    
+
     <div class="lesson-container">
         <div class="lesson-header">第二單元</div>
         <div class="lesson-items">
@@ -48,8 +49,6 @@
     </div>
 </div>
 <script type="module" src="/firebase/pagetime.js"></script>
-<script type="module" src="/firebase/video.js"></script>
-<script type="module" src="/firebase/config.js"></script>
 <script type="module" src="/firebase/percent_UI.js"></script>
 <!-- <script type="module" src="/firebase/clean_pagetime.js"></script> -->
 <script src="/firebase/dev_tools.js"></script>
