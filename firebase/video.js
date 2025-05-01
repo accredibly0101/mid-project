@@ -29,7 +29,7 @@ playerVars: {
     iv_load_policy: 3,
     rel: 0,
     modestbranding: 1,
-    playsinline: 0
+    playsinline: 1
 },
 events: {
     'onReady': onPlayerReady,

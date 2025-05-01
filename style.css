@@ -71,7 +71,7 @@ body {
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* 情感化彈跳動畫 */
+/* 公告視窗情感化彈跳動畫 */
 /* @keyframes bounceFadeIn {
     0% {
         opacity: 0;
@@ -145,6 +145,7 @@ body {
     margin-bottom: 3px;
     border-radius: var(--mid-border-radi);
     border: 1px solid rgb(202, 202, 202);
+    background-position: center;
 }
 .course-card p {
     font-size: 14px;
