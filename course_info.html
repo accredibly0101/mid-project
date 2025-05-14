@@ -9,6 +9,7 @@
 </head>
 <body>
 <!-- 課程資訊頁面 -->
+<div id="userInfo" style="position: absolute; top: 10px; left: 10px;"></div>
 <div class="course-info">
     <a href="course_index.html" class="back-button">❮❮ 首頁</a>
     <div class="course-header">
@@ -58,12 +59,22 @@
 <script type="module" src="/firebase/percent_UI.js"></script>
 <script type="module" src="/firebase/pagetime.js"></script>
 <!-- 開發者工具 -->
-<script src="/firebase/dev_tools.js"></script>
+<!-- <script src="/firebase/dev_tools.js"></script> -->
 <script>
     function setVideoInfo(title, videoId) {
         localStorage.setItem('selectedLesson', title);
         localStorage.setItem('selectedVideoId', videoId);
         }
+
+    document.addEventListener("DOMContentLoaded", function () {
+    const name = localStorage.getItem("displayName") || "使用者";
+    const userInfo = document.getElementById("userInfo");
+    if (userInfo) {
+    userInfo.textContent = `${name} 同學`;
+    } else {
+    console.warn("找不到 #userInfo 元素");
+    }
+});
 </script>
 <!-- <script type="module" src="/firebase/clean_pagetime.js"></script> -->
 </html>

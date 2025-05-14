@@ -3,24 +3,31 @@ import {
     signInWithEmailAndPassword,
     createUserWithEmailAndPassword
 } from 'https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js';
-import { doc, setDoc } from 'https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js';
+import { doc, setDoc, getDoc } from 'https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js';
 
 // 登入
 document.getElementById("login-btn").addEventListener("click", async () => {
     const email = document.getElementById("login-email").value;
     const password = document.getElementById("login-password").value;
-    
+
     try {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
-    
-      // ✅ 儲存目前使用者資訊
+
+        // 抓使用者 Firestore 資料
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        if (userDoc.exists()) {
+            const info = userDoc.data().info || {};
+            localStorage.setItem("displayName", info.displayName || "使用者");
+            window.displayName = info.displayName || "使用者";
+        }
+
+        // 儲存 UID
         localStorage.setItem("user", user.uid);
         window.currentUsername = user.uid;
-    
-        alert(`登入成功！歡迎 ${user.email}`);
-      // 導向主頁（可選）
-    window.location.href = "course_index.html";
+
+        alert(`登入成功！歡迎 ${email}`);
+        window.location.href = "course_index.html";
     } catch (error) {
         alert("登入失敗：" + error.message);
     }
