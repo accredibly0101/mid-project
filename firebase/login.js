@@ -60,3 +60,5 @@ document.getElementById("register-btn").addEventListener("click", async () => {
         alert("註冊失敗：" + error.message);
     }
 });
+
+

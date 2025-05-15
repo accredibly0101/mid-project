@@ -10,6 +10,17 @@
 </head>
 <body>
 <!-- 課程資訊頁面 -->
+<header>
+    <div class="left-section">
+        <div class="logo"></div>
+        <div class="user-section" id="userInfo">使用者 同學</div>
+        <button id="logout-btn">登出</button>
+    </div>
+    <div class="right-section">
+        <div class="info-button" title="公告欄"></div>
+        <div id="announcements-container"></div> 
+    </div>
+</header>
 <div class="course-info">
     <a href="course_info.html" class="back-button">❮❮ 課程資訊</a>
     <div class="course-name">訊息與介面設計</div>
@@ -52,5 +63,24 @@
 <script type="module" src="/firebase/percent_UI.js"></script>
 <!-- <script type="module" src="/firebase/clean_pagetime.js"></script> -->
 <!-- <script src="/firebase/dev_tools.js"></script> -->
+<script>
+
+    <!--使用者名稱全站常駐-->
+document.addEventListener("DOMContentLoaded", function () {
+    const name = localStorage.getItem("displayName") || "使用者";
+    const userInfo = document.getElementById("userInfo");
+    if (userInfo) {
+        userInfo.textContent = `${name} 同學`;
+    } else {
+        console.warn("找不到 #userInfo 元素");
+    }
+});
+
+document.getElementById("logout-btn").addEventListener("click", () => {
+    localStorage.clear();
+    window.location.href = "login.html";
+});
+
+</script>
 </body>
 </html>

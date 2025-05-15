@@ -9,7 +9,17 @@
 </head>
 <body>
 <!-- 課程資訊頁面 -->
-<div id="userInfo" style="position: absolute; top: 10px; left: 10px;"></div>
+<header>
+    <div class="left-section">
+        <div class="logo"></div>
+        <div class="user-section" id="userInfo">使用者 同學</div>
+        <button id="logout-btn">登出</button>
+    </div>
+    <div class="right-section">
+        <div class="info-button" title="公告欄"></div>
+        <div id="announcements-container"></div> 
+    </div>
+</header>
 <div class="course-info">
     <a href="course_index.html" class="back-button">❮❮ 首頁</a>
     <div class="course-header">
@@ -66,6 +76,7 @@
         localStorage.setItem('selectedVideoId', videoId);
         }
 
+<!--使用者名稱全站常駐-->
     document.addEventListener("DOMContentLoaded", function () {
     const name = localStorage.getItem("displayName") || "使用者";
     const userInfo = document.getElementById("userInfo");
@@ -74,6 +85,11 @@
     } else {
     console.warn("找不到 #userInfo 元素");
     }
+});
+
+document.getElementById("logout-btn").addEventListener("click", () => {
+    localStorage.clear();
+    window.location.href = "login.html";
 });
 </script>
 <!-- <script type="module" src="/firebase/clean_pagetime.js"></script> -->
