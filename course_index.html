@@ -1,10 +1,14 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="style.css">
-<title>行動學習網站－首頁</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <!-- jf open 粉圓 -->
+    <link href="https://cdn.jsdelivr.net/gh/justfont/open-huninn-font@latest/huninn.css" rel="stylesheet" type="text/css" />
+    <!-- 思源柔黑體 (備選方案為思源黑體 Rounded CDN 或 Noto Sans TC) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/wanxuStudio/source-han-rounded@latest/source-han-rounded.css" />
+    <title>行動學習網站－首頁</title>
 
 </head>
 <body>
@@ -47,21 +51,21 @@
 <!-- <script type="module" src="/firebase/clean_pagetime.js"></script> -->
 <!-- <script src="/firebase/dev_tools.js"></script> -->
 <script>
-<!--使用者名稱全站常駐-->
-    document.addEventListener("DOMContentLoaded", function () {
-    const name = localStorage.getItem("displayName") || "使用者";
-    const userInfo = document.getElementById("userInfo");
-    if (userInfo) {
-    userInfo.textContent = `${name} 同學`;
-    } else {
-    console.warn("找不到 #userInfo 元素");
-    }
-});
+    <!--使用者名稱全站常駐-->
+        document.addEventListener("DOMContentLoaded", function () {
+        const name = localStorage.getItem("displayName") || "使用者";
+        const userInfo = document.getElementById("userInfo");
+        if (userInfo) {
+        userInfo.textContent = `${name} 同學`;
+        } else {
+        console.warn("找不到 #userInfo 元素");
+        }
+    });
 
-document.getElementById("logout-btn").addEventListener("click", () => {
-    localStorage.clear();
-    window.location.href = "login.html";
-});
+    document.getElementById("logout-btn").addEventListener("click", () => {
+        localStorage.clear();
+        window.location.href = "login.html";
+    });
 
 </script>
 

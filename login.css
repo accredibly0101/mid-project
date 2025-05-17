@@ -1,0 +1,105 @@
+
+:root {
+    --mid-font:-apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, "PingFang SC", "Microsoft YaHei", "Segoe UI", Roboto, "Noto Sans", sans-serif;
+    --mid-border-radi:3px;
+    --mid-color1:#5271ff;
+    
+    /* --emo-font: */
+    --emo-border-radi:8px;
+    --emo-color1:#5271ff;
+    
+}
+* {
+box-sizing: border-box;
+}
+
+body {
+margin: 0;
+font-family: var(--mid-font);
+background-color: #f4f4f8;
+display: flex;
+justify-content: center;
+align-items: center;
+min-height: 80vh;
+padding: 1rem;
+}
+
+.container {
+background-color: white;
+width: 100%;
+max-width: 400px;
+padding: 2rem 1.5rem;
+border-radius: 16px;
+box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+text-align: center;
+}
+
+.logo {
+width: 45%;
+max-width: 500px;
+margin: 0 auto 1.5rem;
+display: block;
+}
+
+h2 {
+margin-bottom: 1.5rem;
+font-size: 1.5rem;
+color: #333;
+}
+
+input {
+width: 100%;
+padding: 0.8rem;
+margin-bottom: 1rem;
+border: 1px solid #ccc;
+border-radius: 8px;
+font-size: 1rem;
+}
+
+button {
+width: 100%;
+padding: 0.9rem;
+background-color: var(--mid-color1);
+color: white;
+border: none;
+border-radius: 8px;
+font-size: 1rem;
+cursor: pointer;
+transition: background 0.3s ease;
+}
+
+button:hover {
+background-color: var(--mid-color1);
+}
+
+.toggle-text {
+margin-top: 1.2rem;
+font-size: 0.9rem;
+color: #555;
+}
+
+.toggle-text a {
+color: var(--mid-color1);
+text-decoration: none;
+font-weight: 500;
+cursor: pointer;
+}
+
+#register-form {
+display: none;
+}
+
+@media (max-width: 480px) {
+h2 {
+    font-size: 1.3rem;
+}
+
+input,
+button {
+    font-size: 1rem;
+}
+
+.container {
+    padding: 1.5rem 1rem;
+}
+}

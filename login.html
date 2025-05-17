@@ -4,81 +4,53 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>LUMO Learning - 登入 / 註冊</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="login.css" />
+    <link href="https://fonts.googleapis.com/css2?family=ZCOOL+QingKe+HuangYou&display=swap" rel="stylesheet">
+
 </head>
 <body>
-<h1>登入</h1>
-<form id="login-form" onsubmit="return false;">
-    <div id="login-section">
-    <label for="login-email">Email</label><br />
-    <input
-        type="email"
-        id="login-email"
-        name="login-email"
-        placeholder="Email"
-        autocomplete="email"
-        required
-    /><br />
+<div class="container">
+    <img src="/img/Logo/mid-logo.svg" alt="LUMO Logo" class="logo" />
+    <!-- 登入 -->
+    <form id="login-form" onsubmit="return false;">
+    <h2>登入</h2>
+    <input type="email" id="login-email" placeholder="Email" required />
+    <input type="password" id="login-password" placeholder="密碼" required />
+    <button id="login-btn">登入</button>
+    <div class="toggle-text">還沒有帳號嗎？<a onclick="toggleForm()">註冊</a></div>
+    </form>
 
-    <label for="login-password">密碼</label><br />
-    <input
-        type="password"
-        id="login-password"
-        name="login-password"
-        placeholder="密碼"
-        autocomplete="current-password"
-        required
-    /><br />
-
-    <button id="login-btn" type="submit">登入</button>
-    </div>
-</form>
-
-<h1>註冊</h1>
-<form id="register-form" onsubmit="return false;">
-    <div id="register-section">
-    <label for="displayName">姓名</label><br />
-    <input
-        type="text"
-        id="displayName"
-        name="displayName"
-        placeholder="姓名"
-        required
-    /><br />
-
-    <label for="studentID">學號</label><br />
-    <input
-        type="text"
-        id="studentID"
-        name="studentID"
-        placeholder="學號"
-        required
-    /><br />
-
-    <label for="register-email">Email</label><br />
-    <input
-        type="email"
-        id="register-email"
-        name="register-email"
-        placeholder="Email"
-        autocomplete="email"
-        required
-    /><br />
-
-    <label for="register-password">密碼</label><br />
-    <input
-        type="password"
-        id="register-password"
-        name="register-password"
-        placeholder="密碼"
-        autocomplete="new-password"
-        required
-    /><br />
-
-    <button id="register-btn" type="submit">註冊</button>
-    </div>
-</form>
+    <!-- 註冊 -->
+    <form id="register-form" onsubmit="return false;">
+    <h2>註冊</h2>
+    <input type="text" id="displayName" placeholder="姓名" required />
+    <input type="text" id="studentID" placeholder="學號" required />
+    <input type="email" id="register-email" placeholder="Email" required />
+    <input type="password" id="register-password" placeholder="密碼" required />
+    <button id="register-btn">註冊</button>
+    <div class="toggle-text">已經有帳號了？<a onclick="toggleForm()">登入</a></div>
+    </form>
+</div>
 
 <script type="module" src="/firebase/login.js"></script>
+<script>
+    let isLoginVisible = true;
+
+    function toggleForm() {
+        const loginForm = document.getElementById("login-form");
+        const registerForm = document.getElementById("register-form");
+
+        isLoginVisible = !isLoginVisible;
+        loginForm.style.display = isLoginVisible ? "block" : "none";
+        registerForm.style.display = isLoginVisible ? "none" : "block";
+    }
+
+    // 頁面載入時預設只顯示登入
+    window.onload = () => {
+        document.getElementById("login-form").style.display = "block";
+        document.getElementById("register-form").style.display = "none";
+    };
+</script>
+
 </body>
 </html>
