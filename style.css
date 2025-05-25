@@ -18,11 +18,17 @@ body {
 }
 
 :root {
-    --mid-font:-apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, "PingFang SC", "Microsoft YaHei", "Segoe UI", Roboto, "Noto Sans", sans-serif;
+    --mid-font:"Helvetica Neue", Helvetica, Arial, "PingFang SC", "Microsoft YaHei", "Segoe UI", Roboto, "Noto Sans", sans-serif;
     --mid-border-radi:3px;
     --mid-color1:#5271ff;
+
+    /* --emo-font:
+    "Dela Gothic One",
+    "Zen Kurenaido",
+    "Kosugi Maru"
+    "Microsoft YaHei", sans-serif; */
     
-    /* --emo-font:"jf open 粉圓", "思源柔黑體", "PingFang SC", "Segoe UI", "Microsoft YaHei", sans-serif; */
+    /* --emo-font: "Kosugi Maru", sans-serif; */
     --emo-border-radi:8px;
     --emo-color1:#5271ff;
     
@@ -53,8 +59,8 @@ header {
 
 /* Logo：縮小但保持比例且不裁切 */
 .logo {
-    width: 80px;
-    height: 40px;
+    width: 100px;
+    height: 50px;
     background-image: url(/img/Logo/mid-logo.svg);
     background-repeat: no-repeat;
     background-size: contain;  /* ✅ 保持比例縮放 */
@@ -63,13 +69,14 @@ header {
 
 /* 使用者名稱 */
 .user-section {
-    font-size: 14px;
-    color: #555;
+    font-size: 16px;
+    color: #626262;
 }
 
 #logout-btn {
     color: var(--mid-color1);
-    font-size: normal;
+    font-family: var(--mid-font);
+    font-size: 16px;
     border: 0;
     padding: 0;
 }
@@ -94,7 +101,7 @@ header {
 /* 圖片、動畫放置區 情感主要驅動區域 */
 .main-section{
     width: inherit;
-    height: 45vh;
+    height: 50vh;
     margin: 0;
     background-color: var(--mid-color1);
 }
@@ -200,7 +207,7 @@ header {
 .course-card p {
     font-size: 14px;
     line-height: 0.5;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
 }
 
 .progress {
@@ -260,6 +267,7 @@ header {
     margin-bottom: 10px;
     font-size: 16px;
     color: #333;
+    /* font-family: "Zen Kurenaido",sans-serif; */
 }
 
 .lesson-container {
@@ -341,3 +349,7 @@ header {
     stroke: #4caf50;
 }
 
+/* Lumo圖片調整 */
+
+
+/* lumo main */

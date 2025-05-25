@@ -1,10 +1,17 @@
 
 :root {
-    --mid-font:-apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, "PingFang SC", "Microsoft YaHei", "Segoe UI", Roboto, "Noto Sans", sans-serif;
+    --mid-font:"Helvetica Neue", Helvetica, Arial, "PingFang SC", "Microsoft YaHei", "Segoe UI", Roboto, "Noto Sans", sans-serif;
     --mid-border-radi:3px;
     --mid-color1:#5271ff;
     
-    /* --emo-font: */
+    /* --emo-font:
+    "Dela Gothic One",
+    "Zen Kurenaido",
+    "Kosugi Maru"
+    "M PLUS Rounded 1c",
+    "Microsoft YaHei", sans-serif; */
+    
+    /* --emo-font: "Kosugi Maru", sans-serif; */
     --emo-border-radi:8px;
     --emo-color1:#5271ff;
     
@@ -29,9 +36,10 @@ background-color: white;
 width: 100%;
 max-width: 400px;
 padding: 2rem 1.5rem;
-border-radius: 16px;
+border-radius: 5px;
 box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 text-align: center;
+margin-top: 1rem;
 }
 
 .logo {
@@ -73,7 +81,6 @@ background-color: var(--mid-color1);
 }
 
 .toggle-text {
-margin-top: 1.2rem;
 font-size: 0.9rem;
 color: #555;
 }
@@ -102,4 +109,15 @@ button {
 .container {
     padding: 1.5rem 1rem;
 }
+}
+
+/* lumo 圖片調整 */
+.lumo-login {
+    width: 100px;
+    height: auto;
+    background-repeat: no-repeat;
+    background-size: contain;  /* ✅ 保持比例縮放 */
+    background-position: center left;
+    margin: 1rem 0 ;
+
 }

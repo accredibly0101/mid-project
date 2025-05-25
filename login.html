@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>LUMO Learning - 登入 / 註冊</title>
     <link rel="stylesheet" href="login.css" />
-    <link href="https://fonts.googleapis.com/css2?family=ZCOOL+QingKe+HuangYou&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kosugi+Maru&display=swap" rel="stylesheet">
 
 </head>
 <body>
@@ -17,17 +19,19 @@
     <input type="email" id="login-email" placeholder="Email" required />
     <input type="password" id="login-password" placeholder="密碼" required />
     <button id="login-btn">登入</button>
+    <img class="lumo-login" src="/img/Lumo/mid_Lumo_ login.png">
     <div class="toggle-text">還沒有帳號嗎？<a onclick="toggleForm()">註冊</a></div>
-    </form>
+</form>
 
-    <!-- 註冊 -->
-    <form id="register-form" onsubmit="return false;">
+<!-- 註冊 -->
+<form id="register-form" onsubmit="return false;">
     <h2>註冊</h2>
     <input type="text" id="displayName" placeholder="姓名" required />
     <input type="text" id="studentID" placeholder="學號" required />
     <input type="email" id="register-email" placeholder="Email" required />
     <input type="password" id="register-password" placeholder="密碼" required />
     <button id="register-btn">註冊</button>
+    <img class="lumo-login" src="/img/Lumo/mid_Lumo_ login.png">
     <div class="toggle-text">已經有帳號了？<a onclick="toggleForm()">登入</a></div>
     </form>
 </div>
