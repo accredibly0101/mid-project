@@ -12,10 +12,10 @@
 <header>
     <div class="left-section">
         <div class="logo"></div>
-        <div class="user-section" id="userInfo">使用者 同學</div>
-        <button id="logout-btn">登出</button>
     </div>
     <div class="right-section">
+        <div class="user-section" id="userInfo">使用者 同學</div>
+        <button id="logout-btn">登出</button>
         <div class="info-button" title="公告欄"></div>
         <div id="announcements-container"></div> 
     </div>
@@ -25,7 +25,7 @@
     <div class="course-name">訊息與介面設計</div>
     <div class="video-title">課程標題</div>
     <div id="player"></div>
-    <div class="lesson-list"><strong>課程清單</strong></div> 
+    <div class="lesson-list"></div> 
     <div class="lesson-container">
         <div class="lesson-header">第一單元</div>
         <div class="lesson-items">
@@ -60,8 +60,7 @@
 </div>
 <script type="module" src="/firebase/pagetime.js"></script>
 <script type="module" src="/firebase/percent_UI.js"></script>
-<!-- <script type="module" src="/firebase/clean_pagetime.js"></script> -->
-<!-- <script src="/firebase/dev_tools.js"></script> -->
+<script type="module" src="/firebase/firebase-announcements.js"></script>
 <script>
 
     <!--使用者名稱全站常駐-->

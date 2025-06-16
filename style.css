@@ -30,7 +30,8 @@ body {
     
     /* --emo-font: "Kosugi Maru", sans-serif; */
     --emo-border-radi:8px;
-    --emo-color1:#5271ff;
+    --emo-color1:#ea8c2e;
+    --emo-color2:#fff4e8f5;
     
 
 }
@@ -69,7 +70,7 @@ header {
 
 /* 使用者名稱 */
 .user-section {
-    font-size: 16px;
+    font-size: 17px;
     color: #626262;
 }
 
@@ -79,18 +80,21 @@ header {
     font-size: 16px;
     border: 0;
     padding: 0;
+    background-color: rgba(255, 255, 255, 0);
 }
 
 /* 右側 */
 .right-section {
     display: flex;
     align-items: center;
+    gap: 5px;
 }
 
 /* 資訊按鈕 */
 .info-button {
     width: 25px;
     height: 25px;
+    margin-left: 10px;
     background-image: url(/img/info.png);
     background-repeat: no-repeat;
     background-size: contain;
@@ -104,6 +108,7 @@ header {
     height: 50vh;
     margin: 0;
     background-color: var(--mid-color1);
+    margin: 2vh 0;
 }
 
 /* 公告內卡片樣式 */
@@ -198,7 +203,7 @@ header {
     background-size: cover;
     width: inherit;
     height: 100px;
-    background-color: #a3a3a3;
+    background-color: #e1e1e1;
     margin-bottom: 3px;
     border-radius: var(--mid-border-radi);
     border: 1px solid rgb(202, 202, 202);
@@ -219,11 +224,11 @@ header {
 /* 介面樣式2：課程資訊頁面 */
 .course-info {
     max-width: 90%;
-    margin: 0 auto;
-    padding: 0 20px;
+    margin: 0 auto 10px auto;
+    padding: 0 20px 5px 20px;
     background-color: #fff;
     border-radius: var(--mid-border-radi);
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 1px 12px rgba(0, 0, 0, 0.25);
 }
 
 .course-header {
@@ -250,7 +255,7 @@ header {
     font-size: 18px;
     color: var(--mid-color1);
     text-align: right;
-    padding: 10px 0;
+    padding: 5px 0;
     font-weight: 500;
 }
 
@@ -299,7 +304,7 @@ header {
 .video-title {
     font-size: 18px;
     font-weight: normal;
-    margin: 5px 0;
+    margin: 6px 0;
 }
 
 .lesson-item {
@@ -314,8 +319,8 @@ header {
 
 /* 介面樣式：百分比UI的圖形 */
 .circle-progress {
-    width: 25px;
-    height: 25px;
+    width: 20px;
+    height: 20px;
 }
 
 .circular-chart {
@@ -347,6 +352,12 @@ header {
 
 .circular-chart.green .circle {
     stroke: #4caf50;
+}
+
+#player {
+    margin: 5px 0;
+    border-radius: 5px;
+    font-size: 10px;
 }
 
 /* Lumo圖片調整 */
