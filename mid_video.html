@@ -11,7 +11,7 @@
 <!-- 課程資訊頁面 -->
 <header>
     <div class="left-section">
-        <div class="logo"></div>
+        <a href="mid_index.html" class="logo"></a>
     </div>
     <div class="right-section">
         <div class="user-section" id="userInfo">使用者 同學</div>
@@ -21,7 +21,7 @@
     </div>
 </header>
 <div class="course-info">
-    <a href="course_info.html" class="back-button">❮❮ 課程資訊</a>
+    <a href="mid_info.html" class="back-button">❮❮ 課程資訊</a>
     <div class="course-name">訊息與介面設計</div>
     <div class="video-title">課程標題</div>
     <div id="player"></div>
@@ -61,24 +61,5 @@
 <script type="module" src="/firebase/pagetime.js"></script>
 <script type="module" src="/firebase/percent_UI.js"></script>
 <script type="module" src="/firebase/firebase-announcements.js"></script>
-<script>
-
-    <!--使用者名稱全站常駐-->
-document.addEventListener("DOMContentLoaded", function () {
-    const name = localStorage.getItem("displayName") || "使用者";
-    const userInfo = document.getElementById("userInfo");
-    if (userInfo) {
-        userInfo.textContent = `${name} 同學`;
-    } else {
-        console.warn("找不到 #userInfo 元素");
-    }
-});
-
-document.getElementById("logout-btn").addEventListener("click", () => {
-    localStorage.clear();
-    window.location.href = "login.html";
-});
-
-</script>
 </body>
 </html>

@@ -27,7 +27,7 @@ document.getElementById("login-btn").addEventListener("click", async () => {
         window.currentUsername = user.uid;
 
         alert(`登入成功！歡迎 ${email}`);
-        window.location.href = "course_index.html";
+        window.location.href = "mid_index.html";
     } catch (error) {
         alert("登入失敗：" + error.message);
     }

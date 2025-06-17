@@ -49,3 +49,20 @@ document.addEventListener("click", (event) => {
         announcementsContainer.style.display = "none";
     }
 });
+
+//使用者名稱全站常駐
+        document.addEventListener("DOMContentLoaded", function () {
+        const name = localStorage.getItem("displayName") || "使用者";
+        const userInfo = document.getElementById("userInfo");
+        if (userInfo) {
+        userInfo.textContent = `${name} 同學`;
+        } else {
+        console.warn("找不到 #userInfo 元素");
+        }
+    });
+
+//登出按鈕
+    document.getElementById("logout-btn").addEventListener("click", () => {
+        localStorage.clear();
+        window.location.href = "mid_login.html";
+    });

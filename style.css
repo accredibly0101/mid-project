@@ -107,8 +107,8 @@ header {
     width: inherit;
     height: 50vh;
     margin: 0;
-    background-color: var(--mid-color1);
     margin: 2vh 0;
+    border: 1px solid black;
 }
 
 /* 公告內卡片樣式 */
