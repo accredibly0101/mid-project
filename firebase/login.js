@@ -15,7 +15,7 @@ document.getElementById("login-btn").addEventListener("click", async () => {
         const user = userCredential.user;
 
         // 抓使用者 Firestore 資料
-        const userDoc = await getDoc(doc(db, "users", user.uid));
+        const userDoc = await getDoc(doc(db, "mid-users", user.uid));
         if (userDoc.exists()) {
             const info = userDoc.data().info || {};
             localStorage.setItem("displayName", info.displayName || "使用者");
@@ -46,7 +46,7 @@ document.getElementById("register-btn").addEventListener("click", async () => {
         const user = userCredential.user;
 
         // 將 info 寫入 users/{uid}/info
-        const userRef = doc(db, "users", user.uid);
+        const userRef = doc(db, "mid-users", user.uid);
         await setDoc(userRef, {
         info: {
             displayName,

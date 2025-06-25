@@ -6,7 +6,7 @@ const announcementsContainer = document.getElementById("announcements-container"
 // 讀取公告
 async function loadAnnouncements() {
     try {
-        const q = query(collection(db, "announcements"), orderBy("timestamp", "desc"));
+        const q = query(collection(db, "mid_announcements"), orderBy("timestamp", "desc"));
         const querySnapshot = await getDocs(q);
 
         announcementsContainer.innerHTML = ""; // 先清空舊的內容

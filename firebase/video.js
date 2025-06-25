@@ -4,7 +4,7 @@ import {doc, getDoc, setDoc, serverTimestamp} from "https://www.gstatic.com/fire
 // 使用者名稱
 const username = getUsername();
 // const username = "anonymous";
-const userRef = doc(db, "mid_users", username);
+const userRef = doc(db, "mid-users", username);
 
 // 2️⃣ YouTube Player 設定
 var tag = document.createElement('script');

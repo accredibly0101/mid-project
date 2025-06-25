@@ -13,7 +13,7 @@ month: '2-digit',
 day: '2-digit'
 }).replaceAll('/', '-');
 
-const userDocRef = doc(db, "mid_users", username);
+const userDocRef = doc(db, "mid-users", username);
 let pageStartTime = Date.now();
 
 async function savePageTime() {
