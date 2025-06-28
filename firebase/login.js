@@ -55,7 +55,9 @@ document.getElementById("register-btn").addEventListener("click", async () => {
         }
         });
 
-        alert("註冊成功！請重新登入");
+        alert("註冊成功！請點擊下方重新登入");
+        document.getElementById("login-form").style.display = "block";
+        document.getElementById("register-form").style.display = "none";
     } catch (error) {
         alert("註冊失敗：" + error.message);
     }

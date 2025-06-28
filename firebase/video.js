@@ -102,9 +102,22 @@ try {
     data.videos[currentVideoId].completed = true;
     }
 
-    data.lastUpdate = serverTimestamp();
+    // ✅ 台灣時間字串（yyyy-mm-dd）
+    const nowTW = new Date().toLocaleDateString('zh-TW', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+    }).replaceAll('/', '-');
 
-    await setDoc(userRef, { videos: data.videos, lastUpdate: data.lastUpdate }, { merge: true });
+    data.lastUpdate = serverTimestamp();          // UTC 時間（保持原樣）
+    data.lastUpdateDateTW = nowTW;               // 台灣當地時間（新增）
+
+    await setDoc(userRef, {
+    videos: data.videos,
+    lastUpdate: data.lastUpdate,
+    lastUpdateDateTW: data.lastUpdateDateTW    // 儲存進去
+    }, { merge: true });
+
     updateLessonProgressUI(); 
     console.log("✅ 影片紀錄完成：", currentVideoId, cappedDuration, data.videos[currentVideoId].completed);
     } catch (e) {

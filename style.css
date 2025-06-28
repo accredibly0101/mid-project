@@ -101,6 +101,11 @@ header {
     background-position: center;
 }
 
+#todayStatusMsg{
+    margin-top: 1em; 
+    font-weight: normal;
+    color: var(--mid-color1);
+}
 
 /* 圖片、動畫放置區 情感主要驅動區域 */
 .main-section{
