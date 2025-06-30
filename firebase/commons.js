@@ -1,4 +1,4 @@
-import { db } from "/firebase/config.js";
+import { db } from "./config.js";
 import { collection, query, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
 
 const announcementsContainer = document.getElementById("announcements-container");
