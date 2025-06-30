@@ -62,7 +62,7 @@ header {
 .logo {
     width: 100px;
     height: 50px;
-    background-image: url(/img/Logo/mid-logo.svg);
+    background-image: url(./img/Logo/mid-logo.svg);
     background-repeat: no-repeat;
     background-size: contain;  /* ✅ 保持比例縮放 */
     background-position: center left;
@@ -95,7 +95,7 @@ header {
     width: 25px;
     height: 25px;
     margin-left: 10px;
-    background-image: url(/img/info.png);
+    background-image: url(./img/info.png);
     background-repeat: no-repeat;
     background-size: contain;
     background-position: center;
