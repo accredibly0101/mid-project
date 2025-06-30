@@ -101,19 +101,22 @@ header {
     background-position: center;
 }
 
-#todayStatusMsg{
-    margin-top: 1em; 
-    font-weight: normal;
-    color: var(--mid-color1);
+.home_status {
+    margin: 0;
+    font-size: 15px;
+    text-align: left;
 }
 
 /* 圖片、動畫放置區 情感主要驅動區域 */
 .main-section{
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* 垂直置中 */
+    align-items: center; 
     width: inherit;
-    height: 50vh;
-    margin: 0;
+    height: 40vh;
     margin: 2vh 0;
-    border: 1px solid black;
+    /* border: 1px solid black; */
 }
 
 /* 公告內卡片樣式 */
@@ -365,7 +368,49 @@ header {
     font-size: 10px;
 }
 
-/* Lumo圖片調整 */
-
-
 /* lumo main */
+.lumo {
+    width: 280px;
+    height: 280px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    margin: 0 auto;
+    opacity: 0;
+    animation: fadeIn 2s ease-out forwards, floaty 5s ease-in-out infinite;
+}
+
+/* 淡入動畫 */
+@keyframes fadeIn {
+    to {
+        opacity: 1;
+    }
+}
+
+/* 漂浮 + 微晃動動畫 */
+/* @keyframes floaty {
+    0% {
+        transform: translateY(0px) rotate(0deg);
+    }
+    50% {
+        transform: translateY(-5px) rotate(-1deg);
+    }
+    100% {
+        transform: translateY(0px) rotate(1deg);
+    }
+} */
+
+.lumo-text {
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 1.5;
+    color: #444;
+    text-align: center;
+    margin: 0 0 15px 0;
+    min-height: 20px;
+    white-space: pre-wrap;
+    font-family: var(--mid-font);
+    background-color: rgb(255, 255, 255);
+    border-radius: var(--mid-border-radi);
+    padding: 5px;
+}

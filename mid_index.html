@@ -25,9 +25,12 @@
 </header>
 
 <div class="course-overview">
-    <!-- <div id="todayStatusMsg"></div> -->
-    <div id="loginRewardMsg"></div>
-    <div class="main-section"></div>
+    <div id="loginRewardMsg" class="home_status"></div>
+    <div id="todayStatusMsg" class="home_status"></div>
+    <div class="main-section">
+        <div class="lumo"></div>
+        <div class="lumo-text" id="lumoText"></div>
+    </div>
     <div class="course-section">
         <h2 class="course-title">課程總覽</h2>
         <div class="course-list">
@@ -49,5 +52,6 @@
 <script type="module" src="/firebase/pagetime.js"></script>
 <script type="module" src="/firebase/commons.js"></script>
 <script type="module" src="/firebase/home_status.js"></script>
+<script type="module" src="/firebase/lumo.js"></script>
 </body>
 </html>
