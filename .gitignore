@@ -8,11 +8,10 @@ desktop.ini
 
 # Firebase 設定檔（如果不想公開）
 firebase-debug.log
-clean_pagetime.js
-dev_tools.js
+firebase/clean_pagetime.js
+firebase/dev_tools.js
 
 # 環境變數檔（未來可能用到）
 .env
 # log 檔q
 *.log
-
