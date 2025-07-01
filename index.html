@@ -2,10 +2,34 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8" />
-    <meta http-equiv="refresh" content="0; URL=mid_login.html" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Redirecting...</title>
+    <style>
+        body {
+        font-family: 'Kosugi Maru', sans-serif;
+        text-align: center;
+        padding: 2em;
+        }
+    </style>
 </head>
 <body>
-    正在導向登入頁面... 若未自動跳轉，請 <a href="mid_login.html">點這裡</a>。
+
+<script>
+    function isMobileDevice() {
+        return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    }
+
+    if (isMobileDevice()) {
+        // 是手機 → 導向登入頁面
+        window.location.href = "mid_login.html";
+    } else {
+        // 非手機 → 顯示提示訊息
+        document.body.innerHTML = `
+        <h2>🛑 為研究需要，請使用手機開啟本網站！</h2>
+        <p>目前僅開放手機使用，請使用行動裝置重新進入，謝謝您的配合。</p>
+        `;
+    }
+</script>
+
 </body>
 </html>
