@@ -80,8 +80,12 @@ showText(lumoData.texts[textIndex]);
 setInterval(() => {
     textIndex = (textIndex + 1) % lumoData.texts.length;
     showText(lumoData.texts[textIndex]);
-}, 30000); // 3 分鐘 = 180,000 ms
+}, 30000); // 30秒
 
-
+// 使用者點擊 Lumo 時，切換到下一句話
+lumoEl.addEventListener("click", () => {
+    textIndex = (textIndex + 1) % lumoData.texts.length;
+    showText(lumoData.texts[textIndex]);
+});
 
 });
