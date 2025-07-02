@@ -80,7 +80,7 @@ showText(lumoData.texts[textIndex]);
 setInterval(() => {
     textIndex = (textIndex + 1) % lumoData.texts.length;
     showText(lumoData.texts[textIndex]);
-}, 60000); // 3 分鐘 = 180,000 ms
+}, 30000); // 3 分鐘 = 180,000 ms
 
 
 
