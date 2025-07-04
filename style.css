@@ -114,7 +114,7 @@ header {
     justify-content: center; /* 垂直置中 */
     align-items: center; 
     width: inherit;
-    height: 40vh;
+    height: 30vh;
     margin: 2vh 0;
     /* border: 1px solid black; */
 }
@@ -370,8 +370,8 @@ header {
 
 /* lumo main */
 .lumo {
-    width: 280px;
-    height: 280px;
+    width: 200px;
+    height: 200px;
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
