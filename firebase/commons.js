@@ -76,3 +76,17 @@ document.addEventListener("click", (event) => {
         localStorage.clear();
         window.location.href = "mid_login.html";
     });
+
+
+import { createPageTimeTracker } from "./pageTimeTracker.js";
+
+const tracker = createPageTimeTracker({
+    collection: "mid-users",
+    flushEverySeconds: 5,
+    maxTickSeconds: 30,           // 防爆：每次 tick 最多補 30 秒
+    maxPendingFlushSeconds: 300,  // 防爆：一次寫入最多 300 秒
+    debug: true                  // 先開 debug 看 log
+});
+
+tracker.start();
+

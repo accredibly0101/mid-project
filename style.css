@@ -410,7 +410,7 @@ header {
     min-height: 20px;
     white-space: pre-wrap;
     font-family: var(--mid-font);
-    background-color: rgb(255, 255, 255);
+    background-color: rgba(231, 231, 231, 0.614);
     border-radius: var(--mid-border-radi);
     padding: 5px;
 }

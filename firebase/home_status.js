@@ -26,7 +26,7 @@ try {
     const totalLoginDays = Object.keys(loginDates).length;
     const loginMsg = document.getElementById("loginRewardMsg");
     if (loginMsg && totalLoginDays >= 2) {
-    loginMsg.innerText = `連續登入 ：${totalLoginDays} 天`;
+    loginMsg.innerText = `總登入天數 ：${totalLoginDays} 天`;
     }
 
     /*** ✅ 功能二：影片完成總數提示 ***/
