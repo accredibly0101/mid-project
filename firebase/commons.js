@@ -1,7 +1,17 @@
-import { db } from "./config.js";
+import { db, auth } from "./config.js";
 import { collection, query, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
+import { onAuthStateChanged} from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
 const announcementsContainer = document.getElementById("announcements-container");
+
+//是否有登入？
+onAuthStateChanged(auth, user => {
+    if (!user) {
+        // 沒登入 ➜ 導回首頁（或登入頁）
+        // alert(`請先登入後再進行學習`);
+        window.location.href = "mid_login.html";
+    }
+});
 
 // 讀取公告
 async function loadAnnouncements() {

@@ -1,9 +1,13 @@
 import { auth, db } from './config.js';
 import {
     signInWithEmailAndPassword,
-    createUserWithEmailAndPassword
+    createUserWithEmailAndPassword,
+    setPersistence,
+    browserSessionPersistence
 } from 'https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js';
 import { doc, setDoc, getDoc } from 'https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js';
+
+await setPersistence(auth, browserSessionPersistence)
 
 // 登入
 document.getElementById("login-btn").addEventListener("click", async () => {
@@ -11,6 +15,9 @@ document.getElementById("login-btn").addEventListener("click", async () => {
     const password = document.getElementById("login-password").value;
 
     try {
+        // 👉 先設定登入儲存策略：只維持 session
+        await setPersistence(auth, browserSessionPersistence);        
+        
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
 

@@ -20,13 +20,13 @@ try {
     if (!loginDates[today]) {
     loginDates[today] = true;
     await updateDoc(userRef, { loginDates });
-    console.log(`✅ 登入記錄已新增 ${today}`);
+    console.log(`登入記錄已新增 ${today}`);
     }
 
     const totalLoginDays = Object.keys(loginDates).length;
     const loginMsg = document.getElementById("loginRewardMsg");
     if (loginMsg && totalLoginDays >= 2) {
-    loginMsg.innerText = `🗓️ 連續登入 ：${totalLoginDays} 天`;
+    loginMsg.innerText = `連續登入 ：${totalLoginDays} 天`;
     }
 
     /*** ✅ 功能二：影片完成總數提示 ***/
@@ -41,7 +41,7 @@ try {
 
         const statusMsg = document.getElementById("todayStatusMsg");
         if (statusMsg) {
-            statusMsg.innerText = `📌 完成觀看影片總數：${watchedCount} 部`;
+            statusMsg.innerText = `完成觀看影片總數：${watchedCount} 部`;
         }
     } catch (e) {
         console.error("❌ 發生錯誤：", e);
