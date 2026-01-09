@@ -1,247 +1,542 @@
-// 初始化播放器之前先檢查有沒有點到沒開放的影片
 import { loadReleaseConfig, isUnitOpen, showLockedMessage, getNowInTaipei } from "./releaseGate.js";
 import { videoToUnit } from "./videoMap.js";
 
+import { db, getUsername } from "./config.js";
+import { doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
+
+/* ---------------------------
+工具：取得純標題文字（排除 percent span）
+---------------------------- */
+function getLessonTitleOnly(el) {
+if (!el) return "";
+const clone = el.cloneNode(true);
+const percent = clone.querySelector(".progress-percent");
+if (percent) percent.remove();
+return clone.textContent.trim();
+}
+
+/* ---------------------------
+工具：從 data-src 抽 videoId
+---------------------------- */
+function extractVideoId(url) {
+if (!url) return null;
+const match = url.match(/\/embed\/([^\?]+)/);
+return match ? match[1] : null;
+}
+
+/* ---------------------------
+防偷跑（保留你的邏輯）
+---------------------------- */
 (async function guardDirectAccess() {
-    const releaseConfig = await loadReleaseConfig();
-    const now = getNowInTaipei();
+const releaseConfig = await loadReleaseConfig();
+const now = getNowInTaipei();
 
-    const videoId = localStorage.getItem("currentVideoId");
-    if (!videoId) return;
+const videoId = localStorage.getItem("currentVideoId");
+if (!videoId) return;
 
-    const unitKey = videoToUnit[videoId];
-    if (!unitKey) {
+const unitKey = videoToUnit[videoId];
+if (!unitKey) {
     showLockedMessage("此影片不存在或尚未開放");
     window.location.replace("mid_index.html");
     return;
-    }
+}
 
+const open = isUnitOpen(releaseConfig, unitKey, now);
+if (!open) {
+    showLockedMessage("此影片尚未開放");
 
-    const open = isUnitOpen(releaseConfig, unitKey, now);
-    if (!open) {
-        showLockedMessage("此影片尚未開放");
+    localStorage.removeItem("currentVideoId");
+    localStorage.removeItem("currentVideoTitle");
 
-        // ✅ 清掉避免重新整理又偷跑
-        localStorage.removeItem("currentVideoId");
-        localStorage.removeItem("currentVideoTitle"); // 如果你有存標題
-
-        // ✅ 真的跳走
-        window.location.replace("mid_video.html"); // 依你的課程頁檔名改
-        return;
-    }
+    window.location.replace("mid_video.html"); // 依你的檔名調整
+    return;
+}
 })();
 
-import { db, getUsername } from './config.js';
-import {doc, getDoc, setDoc, serverTimestamp} from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
+function formatTime(seconds) {
+    seconds = Math.max(0, Math.floor(seconds || 0));
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = seconds % 60;
 
-// 使用者名稱
+    const mm = String(m).padStart(2, "0");
+    const ss = String(s).padStart(2, "0");
+
+    if (h > 0) return `${h}:${mm}:${ss}`;
+    return `${mm}:${ss}`;
+}
+
+function setResumeHint(seconds) {
+    const el = document.getElementById("resume-hint");
+    if (!el) return;
+
+    if (seconds && seconds >= 5) {
+        el.textContent = `已跳回上次觀看紀錄：${formatTime(seconds)}`;
+    } else {
+        // 沒有有效續播點就清掉或顯示別的文字（你可改）
+        el.textContent = ``;
+    }
+}
+
+
+
+/* ---------------------------
+Firestore 參考
+---------------------------- */
 const username = getUsername();
-// const username = "anonymous";
-const userRef = doc(db, "mid-users", username);
+// 若 username 可能為空，至少不要 throw
+const userRef = doc(db, "mid-users", username || "anonymous");
 
-// 2️⃣ YouTube Player 設定
-var tag = document.createElement('script');
+/* =========================
+✅ 續播（localStorage 心跳）設定
+========================= */
+const RESUME_KEY = "resumePositions_v1";
+const resumeMemCache = {}; // 記憶體快取：同頁更快
+
+function loadResumeMap() {
+try {
+    return JSON.parse(localStorage.getItem(RESUME_KEY) || "{}");
+} catch {
+    return {};
+}
+}
+
+function saveResumePositionLocal(videoId, seconds) {
+if (!videoId || typeof seconds !== "number") return;
+// 避免寫入太小或 NaN
+if (!Number.isFinite(seconds) || seconds < 0) return;
+
+resumeMemCache[videoId] = seconds;
+
+const map = loadResumeMap();
+map[videoId] = seconds;
+localStorage.setItem(RESUME_KEY, JSON.stringify(map));
+}
+
+function getResumePositionLocal(videoId) {
+if (!videoId) return 0;
+
+if (typeof resumeMemCache[videoId] === "number") return resumeMemCache[videoId];
+
+const map = loadResumeMap();
+const v = map[videoId];
+if (typeof v === "number") {
+    resumeMemCache[videoId] = v;
+    return v;
+}
+return 0;
+}
+
+/* ---------------------------
+Firestore 讀取 lastPosition（備援）
+---------------------------- */
+async function getResumePositionRemote(videoId) {
+try {
+    if (!username || !videoId) return 0;
+
+    const snap = await getDoc(userRef, { source: "server" });
+    if (!snap.exists()) return 0;
+
+    const pos = snap.data()?.videos?.[videoId]?.lastPosition;
+    if (typeof pos === "number") {
+    resumeMemCache[videoId] = pos;
+    return pos;
+    }
+} catch (e) {
+    console.error("❌ 讀取 Firestore lastPosition 失敗：", e);
+}
+return 0;
+}
+
+/* ---------------------------
+✅ 統一載入（只跳不播）
+優先 localStorage，沒有再用 Firestore
+---------------------------- */
+async function loadWithResume(videoId) {
+    let pos = getResumePositionLocal(videoId);
+    if (pos < 5) pos = await getResumePositionRemote(videoId);
+    if (pos < 5) pos = 0;
+
+    setResumeHint(pos); // ✅ 更新「已跳回...」文字
+
+    // ✅ 用 startSeconds 載入（比 load+seek 更穩）
+    player.loadVideoById({ videoId, startSeconds: pos });
+}
+
+/* =========================
+YouTube Player 設定
+========================= */
+var tag = document.createElement("script");
 tag.src = "https://www.youtube.com/iframe_api";
-document.getElementsByTagName('script')[0].parentNode.insertBefore(tag, null);
+document.getElementsByTagName("script")[0].parentNode.insertBefore(tag, null);
 
 let player;
+
+// 觀看時間統計（用於 duration/percent）
 let sessionStartTime = null;
-let videoDuration = 0;
+
+// 當前影片資訊（由 YouTube 播放後取得）
 let currentVideoId = "";
 let currentVideoTitle = "";
+let currentVideoDuration = 0;
 
-// YouTube 影片準備好時
+// ✅ 心跳定時器
+let resumeTimer = null;
+
+// ✅ 記錄「上一個穩定的影片 id」（避免某些狀態抓不到）
+let lastStableVideoId = "";
+
+/* ---------------------------
+心跳：播放中每 2 秒存一次 localStorage 停點
+---------------------------- */
+function startResumeHeartbeat() {
+stopResumeHeartbeat();
+resumeTimer = setInterval(() => {
+    try {
+    if (!player || typeof player.getCurrentTime !== "function") return;
+    const vid = player.getVideoData?.().video_id || currentVideoId || lastStableVideoId;
+    if (!vid) return;
+
+    const pos = Math.floor(player.getCurrentTime() || 0);
+    if (pos > 0) saveResumePositionLocal(vid, pos);
+    } catch {
+    // 不要吵使用者
+    }
+}, 2000);
+}
+
+function stopResumeHeartbeat() {
+if (resumeTimer) clearInterval(resumeTimer);
+resumeTimer = null;
+}
+
+/* =========================
+✅ 存影片資料到 Firestore（保留你原結構 + 加 lastPosition）
+- videos[videoId] = { title, duration, percentWatched, completed, lastPosition, lastWatchedAt }
+========================= */
+async function saveVideoData({
+videoId,
+title,
+watchTimeSeconds,
+positionSeconds,
+durationSecondsSnapshot,
+}) {
+try {
+    if (!username) return;
+    if (!videoId) return;
+
+    const docSnap = await getDoc(userRef);
+    const data = docSnap.exists() ? docSnap.data() : {};
+    const videos = data.videos || {};
+
+    if (!videos[videoId]) {
+    videos[videoId] = {
+        title: title || "未知標題",
+        duration: 0,
+        completed: false,
+        percentWatched: 0,
+        lastPosition: 0,
+    };
+    } else {
+    // 補標題
+    if (!videos[videoId].title || videos[videoId].title === "") {
+        videos[videoId].title = title || "未知標題";
+    }
+    }
+
+    // ✅ 寫入 lastPosition（續播用）
+    if (typeof positionSeconds === "number" && positionSeconds >= 0) {
+    videos[videoId].lastPosition = positionSeconds;
+    videos[videoId].lastWatchedAt = serverTimestamp();
+
+    // 同步 localStorage（讓同頁切換立即生效）
+    saveResumePositionLocal(videoId, positionSeconds);
+    }
+
+    // ✅ 加總觀看秒數（研究/完成度用）
+    const dur = (typeof durationSecondsSnapshot === "number" && durationSecondsSnapshot > 0)
+    ? durationSecondsSnapshot
+    : 0;
+
+    if (typeof watchTimeSeconds === "number" && watchTimeSeconds > 0) {
+    const prev = videos[videoId].duration || 0;
+    const newTotal = prev + watchTimeSeconds;
+
+    const capped = (dur > 0) ? Math.min(newTotal, dur) : newTotal;
+    videos[videoId].duration = capped;
+
+    if (dur > 0) {
+        videos[videoId].percentWatched = Math.round((capped / dur) * 100);
+
+        if ((capped / dur) >= 0.8) {
+        videos[videoId].completed = true;
+        }
+    }
+    }
+
+    // 台灣日期（保留你的欄位）
+    const nowTW = new Date().toLocaleDateString("zh-TW", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    }).replaceAll("/", "-");
+
+    await setDoc(
+    userRef,
+    {
+        videos,
+        lastUpdate: serverTimestamp(),
+        lastUpdateDateTW: nowTW,
+    },
+    { merge: true }
+    );
+
+    // ✅ 更新 percent UI
+    if (typeof window.updateLessonProgressUI === "function") {
+    window.updateLessonProgressUI();
+    }
+
+    // Debug
+    // console.log("✅ saveVideoData", videoId, "watch+", watchTimeSeconds, "pos=", positionSeconds);
+} catch (e) {
+    console.error("❌ 儲存影片紀錄失敗：", e);
+}
+}
+
+/* =========================
+✅ 核心：提交「目前正在看的影片」進度（不用先暫停）
+- 一定要在 loadVideoById 前呼叫（避免 currentTime reset）
+========================= */
+async function commitCurrentProgress(reason = "manual") {
+try {
+    if (!player) return;
+
+    const vid = player.getVideoData?.().video_id || currentVideoId || lastStableVideoId;
+    if (!vid) return;
+
+    const pos = (typeof player.getCurrentTime === "function")
+    ? Math.floor(player.getCurrentTime() || 0)
+    : 0;
+
+    // 有些狀態會拿不到 title（保底）
+    const title = player.getVideoData?.().title || currentVideoTitle || "";
+
+    // 用 sessionStartTime 算本次新增觀看秒數
+    let watchTime = 0;
+    if (sessionStartTime) {
+    watchTime = Math.floor((Date.now() - sessionStartTime) / 1000);
+    }
+
+    // 用「切換前的影片總長」做 cap/percent（切換前抓才準）
+    const durSnap = (typeof player.getDuration === "function")
+    ? (player.getDuration() || currentVideoDuration || 0)
+    : (currentVideoDuration || 0);
+
+    // ✅ 提交
+    await saveVideoData({
+    videoId: vid,
+    title,
+    watchTimeSeconds: watchTime,
+    positionSeconds: pos,
+    durationSecondsSnapshot: durSnap,
+    });
+
+    // ✅ 重置本次 session（避免重複加總）
+    sessionStartTime = null;
+
+    // console.log(`✅ commit(${reason})`, vid, "watch+", watchTime, "pos=", pos);
+} catch (e) {
+    console.error("❌ commitCurrentProgress 失敗：", e);
+}
+}
+
+/* =========================
+YouTube iframe 初始化
+========================= */
 window.onYouTubeIframeAPIReady = function () {
-player = new YT.Player('player', {
-height: '250px',
-width: '100%',
-videoId: '',
-playerVars: {
+player = new YT.Player("player", {
+    height: "250px",
+    width: "100%",
+    videoId: "",
+    playerVars: {
     controls: 1,
     fs: 1,
     iv_load_policy: 3,
     rel: 0,
     modestbranding: 1,
-    playsinline: 1
-},
-events: {
-    'onReady': onPlayerReady,
-    'onStateChange': onPlayerStateChange
-}
+    playsinline: 1,
+    },
+    events: {
+    onReady: () => {
+        console.log("✅ YouTube Player Ready");
+    },
+    onStateChange: onPlayerStateChange,
+    },
 });
 };
 
-function onPlayerReady(event) {
-console.log('✅ YouTube Player Ready');
-}
-
-
-// 3️⃣ 播放狀態變更處理
 function onPlayerStateChange(event) {
+if (!player) return;
+
+// PLAYING：開始計時 + 開啟心跳
 if (event.data === YT.PlayerState.PLAYING) {
     sessionStartTime = Date.now();
-    videoDuration = player.getDuration();
 
-    currentVideoId = player.getVideoData().video_id;
-    currentVideoTitle = player.getVideoData().title;
+    const vd = player.getVideoData?.() || {};
+    currentVideoId = vd.video_id || currentVideoId;
+    currentVideoTitle = vd.title || currentVideoTitle;
+
+    if (currentVideoId) lastStableVideoId = currentVideoId;
+
+    currentVideoDuration = (typeof player.getDuration === "function") ? (player.getDuration() || 0) : 0;
+
+    startResumeHeartbeat();
 }
 
-if (event.data === YT.PlayerState.ENDED || event.data === YT.PlayerState.PAUSED) {
-    if (sessionStartTime) {
-    const endTime = Date.now();
-    const watchTime = Math.floor((endTime - sessionStartTime) / 1000);
-
-    saveVideoData(watchTime);
-    sessionStartTime = null;
-    }
+// PAUSED / ENDED：停止心跳 + 提交一次（補強）
+if (event.data === YT.PlayerState.PAUSED || event.data === YT.PlayerState.ENDED) {
+    stopResumeHeartbeat();
+    // 這裡提交當作補強；真正「切換」會在 click 時先提交
+    commitCurrentProgress(event.data === YT.PlayerState.PAUSED ? "pause" : "ended");
 }
 }
 
-// 4️⃣ 儲存影片資料至 Firestore
-async function saveVideoData(watchTime) {
-try {
-    const docSnap = await getDoc(userRef);
-    let data = docSnap.exists() ? docSnap.data() : {};
-
-    if (!data.videos) data.videos = {};
-    if (!data.videos[currentVideoId]) {
-    data.videos[currentVideoId] = {
-        title: currentVideoTitle || player.getVideoData().title || "未知標題",
-        duration: 0,
-        completed: false
-    };
-    } else {
-    // 補標題
-    if (!data.videos[currentVideoId].title || data.videos[currentVideoId].title === "") {
-        data.videos[currentVideoId].title = currentVideoTitle || player.getVideoData().title || "未知標題";
-    }
-    }
-
-    // 🧠 加總但不超過總長度
-    const previousDuration = data.videos[currentVideoId].duration || 0;
-    const newDuration = previousDuration + watchTime;
-    const cappedDuration = Math.min(newDuration, videoDuration);
-
-    data.videos[currentVideoId].duration = cappedDuration;
-    data.videos[currentVideoId].percentWatched = Math.round((cappedDuration / videoDuration) * 100);
-
-
-    // ✅ 若超過 80%，就算完成
-    const percentWatched = cappedDuration / videoDuration;
-    if (percentWatched >= 0.8) {
-    data.videos[currentVideoId].completed = true;
-    }
-
-    // ✅ 台灣時間字串（yyyy-mm-dd）
-    const nowTW = new Date().toLocaleDateString('zh-TW', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit'
-    }).replaceAll('/', '-');
-
-    data.lastUpdate = serverTimestamp();          // UTC 時間（保持原樣）
-    data.lastUpdateDateTW = nowTW;               // 台灣當地時間（新增）
-
-    await setDoc(userRef, {
-    videos: data.videos,
-    lastUpdate: data.lastUpdate,
-    lastUpdateDateTW: data.lastUpdateDateTW    // 儲存進去
-    }, { merge: true });
-
-    updateLessonProgressUI(); 
-    console.log("✅ 影片紀錄完成：", currentVideoId, cappedDuration, data.videos[currentVideoId].completed);
-    } catch (e) {
-        console.error("❌ 儲存影片紀錄失敗：", e);
-    }
-}
-
+/* =========================
+DOM：載入影片 / 清單切換（含續播）
+========================= */
 document.addEventListener("DOMContentLoaded", function () {
-    updateLessonProgressUI();
+// 先更新一次目錄百分比 UI
+if (typeof window.updateLessonProgressUI === "function") {
+    window.updateLessonProgressUI();
+}
 
-    // 👉 優先從 localStorage 讀取資料
-    const lessonName = localStorage.getItem("selectedLesson");
-    const videoIdFromStorage = localStorage.getItem("selectedVideoId");
+const lessonName = localStorage.getItem("selectedLesson");
+const videoIdFromStorage = localStorage.getItem("selectedVideoId");
 
-    const lessonItems = document.querySelectorAll(".lesson-item");
-    const videoTitle = document.querySelector(".video-title");
+const lessonItems = document.querySelectorAll(".lesson-item");
+const videoTitleEl = document.querySelector(".video-title");
 
-    function waitForPlayerReady(callback) {
-        if (player && typeof player.loadVideoById === "function") {
-            callback();
-        } else {
-            setTimeout(() => waitForPlayerReady(callback), 100);
-        }
+function waitForPlayerReady(callback) {
+    if (player && typeof player.loadVideoById === "function") callback();
+    else setTimeout(() => waitForPlayerReady(callback), 100);
+}
+
+function setActiveByElement(el) {
+    lessonItems.forEach((i) => i.classList.remove("active"));
+    if (el) el.classList.add("active");
+}
+
+function setActiveByLessonName(name) {
+    lessonItems.forEach((item) => {
+    const hit = getLessonTitleOnly(item) === name;
+    item.classList.toggle("active", hit);
+
+    if (hit) {
+        const parentItems = item.closest(".lesson-items");
+        if (parentItems) parentItems.style.display = "block";
+    }
+    });
+}
+
+// 初次載入：localStorage 指定影片 or 預設第一部
+waitForPlayerReady(async () => {
+    if (videoIdFromStorage) {
+    await loadWithResume(videoIdFromStorage);
+
+    if (lessonName && videoTitleEl) {
+        videoTitleEl.textContent = lessonName; // localStorage 存的標題不含 %
+    }
+    if (lessonName) setActiveByLessonName(lessonName);
+
+    localStorage.removeItem("selectedLesson");
+    localStorage.removeItem("selectedVideoId");
+    return;
     }
 
-    waitForPlayerReady(() => {
-        if (videoIdFromStorage) {
-            player.loadVideoById(videoIdFromStorage);
-            if (lessonName) {
-                videoTitle.textContent = lessonName;
-            }
+    // 預設第一部
+    if (lessonItems.length > 0) {
+    const firstItem = lessonItems[0];
+    const firstVideoId = extractVideoId(firstItem.getAttribute("data-src"));
+    if (firstVideoId) await loadWithResume(firstVideoId);
 
-            lessonItems.forEach(item => {
-                const itemText = item.textContent.trim();
-                if (itemText === lessonName) {
-                    item.classList.add("active");
-                    const parentItems = item.closest(".lesson-items");
-                    if (parentItems) {
-                        parentItems.style.display = "block";
-                    }
-                }
-            });
-
-            // ❌ 載入後清除 localStorage（避免干擾下一次跳轉）
-            localStorage.removeItem("selectedLesson");
-            localStorage.removeItem("selectedVideoId");
-
-        } else {
-            // 若 localStorage 無資料，載入預設第一個影片
-            if (lessonItems.length > 0) {
-                const firstItem = lessonItems[0];
-                const firstVideoId = extractVideoId(firstItem.getAttribute("data-src"));
-                if (firstVideoId) player.loadVideoById(firstVideoId);
-                videoTitle.textContent = firstItem.textContent.trim();
-                firstItem.classList.add("active");
-            }
-        }
-    });
-
-    // 點擊課程項目時載入影片
-    lessonItems.forEach(item => {
-        item.addEventListener("click", function () {
-            const newVideoId = extractVideoId(this.getAttribute("data-src"));
-            if (newVideoId) {
-                player.loadVideoById(newVideoId);
-                videoTitle.textContent = this.textContent.trim();
-                lessonItems.forEach(i => i.classList.remove("active"));
-                this.classList.add("active");
-            }
-        });
-    });
+    if (videoTitleEl) videoTitleEl.textContent = getLessonTitleOnly(firstItem);
+    setActiveByElement(firstItem);
+    }
 });
 
-function extractVideoId(url) {
-    const match = url.match(/\/embed\/([^\?]+)/);
-    return match ? match[1] : null;
-}
+// ✅ 點擊同頁切換影片：
+// 1) 先把「上一部」的停點立刻寫入 localStorage（保險）
+// 2) commit 進 Firestore（不用先暫停）
+// 3) 用 startSeconds 載入新影片（只跳不播）
+lessonItems.forEach((item) => {
+    item.addEventListener("click", async function (e) {
+    e.preventDefault();
 
+    const newVideoId = extractVideoId(this.getAttribute("data-src"));
+    if (!newVideoId) return;
 
-let lastPlayedTime = 0; // 記錄影片上次播放的時間
-
-// 當頁面焦點變動時（例如切換分頁、最小化）
-document.addEventListener("visibilitychange", function () {
-    if (document.visibilityState === "hidden") {
-        // 當頁面不再可見時，暫停影片並記錄當前時間
-        if (player && typeof player.getCurrentTime === "function") {
-            lastPlayedTime = player.getCurrentTime(); // 記錄當前播放時間
-            player.pauseVideo(); // 暫停影片
+    // ① 切換瞬間先抓一次上一部停點到 localStorage（最穩）
+    try {
+        const prevVid = player?.getVideoData?.().video_id || currentVideoId || lastStableVideoId;
+        if (prevVid && typeof player.getCurrentTime === "function") {
+        const prevPos = Math.floor(player.getCurrentTime() || 0);
+        if (prevPos > 0) saveResumePositionLocal(prevVid, prevPos);
         }
-    } else if (document.visibilityState === "visible") {
-        // 當頁面恢復可見時，繼續播放影片從上次播放的時間
-        if (player && typeof player.seekTo === "function" && lastPlayedTime > 0) {
-            player.seekTo(lastPlayedTime); // 從上次記錄的時間繼續播放
-            player.playVideo(); // 播放影片
-        }
+    } catch {}
+
+    // ② 切換前提交上一部進度（不必先按暫停）
+    await commitCurrentProgress("switch");
+
+    // ③ 載入新影片並續播（只跳不播）
+    await loadWithResume(newVideoId);
+
+    // ④ UI：標題不要吃到 12%
+    if (videoTitleEl) videoTitleEl.textContent = getLessonTitleOnly(this);
+    setActiveByElement(this);
+    });
+});
+});
+
+/* =========================
+離開頁面 / 背景：提交一次進度（避免丟失）
+========================= */
+window.addEventListener("pagehide", () => {
+stopResumeHeartbeat();
+// pagehide 不要卡住 UI，不 await
+commitCurrentProgress("pagehide");
+});
+
+let lastPlayedTime = 0; // 同一次 session 用（不是 Firestore 續播）
+
+document.addEventListener("visibilitychange", () => {
+if (!player) return;
+
+if (document.visibilityState === "hidden") {
+    // ✅ 先記住目前時間
+    if (typeof player.getCurrentTime === "function") {
+    lastPlayedTime = player.getCurrentTime() || 0;
     }
+
+    // ✅ 自動暫停（你要的功能）
+    if (typeof player.pauseVideo === "function") {
+    player.pauseVideo();
+    }
+
+    // ✅ 停止心跳 + 提交一次進度（續播與 percent 更新）
+    stopResumeHeartbeat();
+    commitCurrentProgress("hidden");
+} else if (document.visibilityState === "visible") {
+    // ✅ 回來只跳不播（同 session）
+    if (typeof player.seekTo === "function" && lastPlayedTime > 0) {
+    player.seekTo(lastPlayedTime, true);
+    // 不呼叫 playVideo(); 只跳不播
+    }
+}
+});
+
+window.addEventListener("blur", () => {
+    if (!player) return;
+    if (typeof player.pauseVideo === "function") player.pauseVideo();
+    stopResumeHeartbeat();
+    commitCurrentProgress("blur");
 });
