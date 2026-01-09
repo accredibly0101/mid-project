@@ -1,3 +1,36 @@
+// 初始化播放器之前先檢查有沒有點到沒開放的影片
+import { loadReleaseConfig, isUnitOpen, showLockedMessage, getNowInTaipei } from "./releaseGate.js";
+import { videoToUnit } from "./videoMap.js";
+
+(async function guardDirectAccess() {
+    const releaseConfig = await loadReleaseConfig();
+    const now = getNowInTaipei();
+
+    const videoId = localStorage.getItem("currentVideoId");
+    if (!videoId) return;
+
+    const unitKey = videoToUnit[videoId];
+    if (!unitKey) {
+    showLockedMessage("此影片不存在或尚未開放");
+    window.location.replace("mid_index.html");
+    return;
+    }
+
+
+    const open = isUnitOpen(releaseConfig, unitKey, now);
+    if (!open) {
+        showLockedMessage("此影片尚未開放");
+
+        // ✅ 清掉避免重新整理又偷跑
+        localStorage.removeItem("currentVideoId");
+        localStorage.removeItem("currentVideoTitle"); // 如果你有存標題
+
+        // ✅ 真的跳走
+        window.location.replace("mid_video.html"); // 依你的課程頁檔名改
+        return;
+    }
+})();
+
 import { db, getUsername } from './config.js';
 import {doc, getDoc, setDoc, serverTimestamp} from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
 
@@ -51,8 +84,6 @@ if (event.data === YT.PlayerState.PLAYING) {
 
     currentVideoId = player.getVideoData().video_id;
     currentVideoTitle = player.getVideoData().title;
-
-    console.log(`🎬 Playing: ${currentVideoTitle}`);
 }
 
 if (event.data === YT.PlayerState.ENDED || event.data === YT.PlayerState.PAUSED) {
@@ -83,7 +114,6 @@ try {
     // 補標題
     if (!data.videos[currentVideoId].title || data.videos[currentVideoId].title === "") {
         data.videos[currentVideoId].title = currentVideoTitle || player.getVideoData().title || "未知標題";
-        console.log(`🔁 已補上影片標題：${data.videos[currentVideoId].title}`);
     }
     }
 
@@ -132,18 +162,13 @@ document.addEventListener("DOMContentLoaded", function () {
     const lessonName = localStorage.getItem("selectedLesson");
     const videoIdFromStorage = localStorage.getItem("selectedVideoId");
 
-    console.log("Lesson Name: ", lessonName);
-    console.log("Video ID: ", videoIdFromStorage);
-
     const lessonItems = document.querySelectorAll(".lesson-item");
     const videoTitle = document.querySelector(".video-title");
 
     function waitForPlayerReady(callback) {
         if (player && typeof player.loadVideoById === "function") {
-            console.log("✅ YouTube Player Ready");
             callback();
         } else {
-            console.log("⌛ Player is not ready yet.");
             setTimeout(() => waitForPlayerReady(callback), 100);
         }
     }

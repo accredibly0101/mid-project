@@ -414,3 +414,21 @@ header {
     border-radius: var(--mid-border-radi);
     padding: 5px;
 }
+
+/* 影片清單鎖定 */
+.locked {
+    opacity: 0.35;
+    filter: grayscale(0.7);
+}
+
+.locked .lesson-header::after {
+    content: " (尚未開放)🔒";
+    font-size: 0.9em;
+}
+.lesson-container.locked .lesson-item,
+.lesson-container.locked a.lesson-item {
+    pointer-events: none;   /* 完全不能點 */
+    cursor: not-allowed;
+}
+
+

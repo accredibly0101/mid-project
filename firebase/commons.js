@@ -13,6 +13,43 @@ onAuthStateChanged(auth, user => {
     }
 });
 
+
+// 課程清單依照日期解鎖
+import { loadReleaseConfig, isUnitOpen, setLocked, showLockedMessage, getNowInTaipei } from "./releaseGate.js";
+
+(async function initReleaseGate() {
+const releaseConfig = await loadReleaseConfig();
+const now = getNowInTaipei();
+console.log("nowTaipei", now.toISOString());
+
+document.querySelectorAll(".lesson-container[data-unit]").forEach(container => {
+    const unitKey = container.dataset.unit;
+    const open = isUnitOpen(releaseConfig, unitKey, now);
+
+    // 鎖整個單元視覺
+    setLocked(container, !open);
+
+    // ✅ 同時鎖 a 與 div（課程頁 / 影片頁都吃到）
+    container.querySelectorAll(".lesson-item").forEach(item => {
+    if (!open) {
+        item.addEventListener(
+        "click",
+        (e) => {
+            // ✅ 先攔截，避免你的「切換影片」程式繼續跑
+            e.preventDefault?.();
+            e.stopPropagation();
+            e.stopImmediatePropagation?.();
+
+            showLockedMessage(`「${container.querySelector(".lesson-header")?.textContent}」尚未開放`);
+        },
+        { capture: true } // ⭐ 關鍵：先攔截
+        );
+    }
+    });
+});
+})();
+
+
 // 讀取公告
 async function loadAnnouncements() {
     try {
@@ -85,7 +122,7 @@ const tracker = createPageTimeTracker({
     flushEverySeconds: 5,
     maxTickSeconds: 30,           // 防爆：每次 tick 最多補 30 秒
     maxPendingFlushSeconds: 300,  // 防爆：一次寫入最多 300 秒
-    debug: true                  // 先開 debug 看 log
+    debug: false                  // 先開 debug 看 log
 });
 
 tracker.start();

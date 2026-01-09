@@ -34,7 +34,7 @@
         <p><strong>授課教師：</strong><br>淡江大學教育科技學系 沈俊毅 副教授</p>
     </div>
     <div class="lesson-list"><strong>課程清單</strong></div> 
-    <div class="lesson-container">
+    <div class="lesson-container" data-unit="unit1">
         <div class="lesson-header">第一單元</div>
         <div class="lesson-items">
             <a href="mid_video.html" class="lesson-item" data-src="https://www.youtube.com/embed/R5b3yt-bTL0" onclick="setVideoInfo('1-1 網站心理學', 'R5b3yt-bTL0')">1-1 網站心理學</a>
@@ -45,7 +45,7 @@
         </div>
     </div>
 
-    <div class="lesson-container">
+    <div class="lesson-container" data-unit="unit2">
         <div class="lesson-header">第二單元</div>
         <div class="lesson-items">
             <a href="mid_video.html" class="lesson-item" data-src="https://www.youtube.com/embed/sQWTDBN6cYA" onclick="setVideoInfo('2-1 網站目標與策略', 'sQWTDBN6cYA')">2-1 網站目標與策略</a>
@@ -56,7 +56,7 @@
         </div>
     </div>
     
-    <div class="lesson-container">
+    <div class="lesson-container" data-unit="unit3">
         <div class="lesson-header">第三單元</div>
         <div class="lesson-items">
             <a href="mid_video.html" class="lesson-item" data-src="https://www.youtube.com/embed/WajU-OYqjl4" onclick="setVideoInfo('3-1 經驗價值與需求呈現', 'WajU-OYqjl4')">3-1 經驗價值與需求呈現</a>
@@ -69,14 +69,10 @@
 </body>
 <script type="module" src="firebase/commons.js"></script>
 <script type="module" src="firebase/percent_UI.js"></script>
-
-<!-- 開發者工具 -->
-<!-- <script src="/firebase/dev_tools.js"></script> -->
 <script>
     function setVideoInfo(title, videoId) {
         localStorage.setItem('selectedLesson', title);
         localStorage.setItem('selectedVideoId', videoId);
-        }
+        }  
 </script>
-<!-- <script type="module" src="/firebase/clean_pagetime.js"></script> -->
 </html>
