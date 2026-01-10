@@ -4,12 +4,12 @@ window.addEventListener("DOMContentLoaded", () => {
 
     // ✅ 只需要圖片清單
     const lumoImages = [
-        "./img/Lumo/mid-Lumo-video/lean1.png",
-        "./img/Lumo/mid-Lumo-video/lean2.png",
-        "./img/Lumo/mid-Lumo-video/lean3.png",
-        "./img/Lumo/mid-Lumo-video/sit1.png",
-        "./img/Lumo/mid-Lumo-video/sit2.png",
-        "./img/Lumo/mid-Lumo-video/sit3.png"
+        "./img/Lumo/mid-Lumo-video/lean1.webp",
+        "./img/Lumo/mid-Lumo-video/lean2.webp",
+        "./img/Lumo/mid-Lumo-video/lean3.webp",
+        "./img/Lumo/mid-Lumo-video/sit1.webp",
+        "./img/Lumo/mid-Lumo-video/sit2.webp",
+        "./img/Lumo/mid-Lumo-video/sit3.webp"
     ];
 
     let currentIndex = -1;
