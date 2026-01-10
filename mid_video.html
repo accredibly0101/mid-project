@@ -23,10 +23,15 @@
 </header>
 <div class="course-info">
     <a href="mid_info.html" class="back-button">❮❮ 課程資訊</a>
-    <div class="course-name">訊息與介面設計</div>
-    <div class="video-title">課程標題</div>
+    <div class="video_header">
+        <div class="course-name">訊息與介面設計</div>
+        <div class="video-title">課程標題</div>
+        <div class="lumo-container">
+            <div class="video-lumo"></div>
+        </div>
+    </div>
     <div id="player"></div>
-<div id="resume-hint">已跳回上次觀看紀錄：</div>
+    <div id="resume-hint">跳回上次觀看紀錄</div>
     <div class="lesson-list"></div> 
     <div class="lesson-container" data-unit="unit1">
         <div class="lesson-header">第一單元</div>
@@ -62,5 +67,6 @@
 </div>
 <script type="module" src="firebase/percent_UI.js"></script>
 <script type="module" src="firebase/commons.js"></script>
+<script type="module" src="firebase/lumo_video.js"></script>
 </body>
 </html>

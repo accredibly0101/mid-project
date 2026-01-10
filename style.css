@@ -368,7 +368,7 @@ header {
     font-size: 10px;
 }
 
-/* lumo main */
+/* lumo 首頁 */
 .lumo {
     width: 300px;
     height: 300px;
@@ -414,6 +414,33 @@ header {
     border-radius: var(--mid-border-radi);
     padding: 5px;
 }
+
+/* lumo 影片頁面 */
+
+/* 標題區塊當「定位基準」 */
+.video_header{
+    position: relative;
+    padding-right: 140px; /* ✅ 預留空間，避免文字被 Lumo 蓋到（可調） */
+}
+
+/* Lumo 浮在上層，釘右上角 */
+.video_header .lumo-container{
+    position: absolute;
+    top: 18px;      /* ✅ 往下幾 px，可調 */
+    right: 0px;    /* ✅ 離右邊距離，可調 */
+    z-index: 25;    /* ✅ 壓過一般內容 */
+    pointer-events: none; /* ✅ 中性版：避免擋到點擊（很重要） */
+}
+
+/* Lumo 圖片本體 */
+.video_header .video-lumo{
+    width: 80px;   /* 依你想要的紅框大小調整 */
+    height: 80px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
 
 /* 影片清單鎖定 */
 .locked {
