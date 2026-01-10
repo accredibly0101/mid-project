@@ -64,7 +64,7 @@ border-radius: 8px;
 font-size: 1rem;
 }
 
-button {
+#login-btn, #register-btn {
 width: 100%;
 padding: 0.9rem;
 background-color: var(--mid-color1);
@@ -76,7 +76,7 @@ cursor: pointer;
 transition: background 0.3s ease;
 }
 
-button:hover {
+#login-btn:hover, #register-btn:hover {
 background-color: var(--mid-color1);
 }
 
@@ -120,4 +120,15 @@ button {
     background-position: center left;
     margin: 1rem 0 ;
 
+}
+
+.forgot-button {
+    margin-top: 10px;
+    color: var(--mid-color1);
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: 14px;
+    cursor: pointer;
+    text-decoration: underline;
 }

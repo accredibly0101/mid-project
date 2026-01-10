@@ -3,7 +3,8 @@ import {
     signInWithEmailAndPassword,
     createUserWithEmailAndPassword,
     setPersistence,
-    browserSessionPersistence
+    browserSessionPersistence,
+    sendPasswordResetEmail
 } from 'https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js';
 import { doc, setDoc, getDoc } from 'https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js';
 
@@ -70,4 +71,19 @@ document.getElementById("register-btn").addEventListener("click", async () => {
     }
 });
 
+document.getElementById("forgot-password").addEventListener("click", async () => {
+    const email = document.getElementById("login-email").value.trim();
 
+    if (!email) {
+        alert("請先在 Email 欄位輸入你的信箱，再按「忘記密碼」");
+        document.getElementById("login-email").focus();
+        return;
+    }
+
+    try {
+        await sendPasswordResetEmail(auth, email);
+        alert("已寄出重設密碼信，請到信箱收信（也記得看垃圾郵件）");
+    } catch (error) {
+        alert("寄送失敗：" + error.message);
+    }
+});
