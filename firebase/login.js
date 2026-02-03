@@ -44,31 +44,33 @@ document.getElementById("login-btn").addEventListener("click", async () => {
 
 // 註冊
 document.getElementById("register-btn").addEventListener("click", async () => {
-    const displayName = document.getElementById("displayName").value;
-    const studentID = document.getElementById("studentID").value;
-    const email = document.getElementById("register-email").value;
-    const password = document.getElementById("register-password").value;
+const displayName = document.getElementById("displayName").value;
+const studentID = document.getElementById("studentID").value;
+const email = document.getElementById("register-email").value;
+const password = document.getElementById("register-password").value;
 
-    try {
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
+try {
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
 
-        // 將 info 寫入 users/{uid}/info
-        const userRef = doc(db, "mid-users", user.uid);
-        await setDoc(userRef, {
-        info: {
-            displayName,
-            studentID,
-            email
-        }
-        });
+    // 建立使用者文件 mid-users/{uid}
+    const userRef = doc(db, "mid-users", user.uid);
+    await setDoc(userRef, {
+    info: {
+        displayName,
+        studentID,
+        email
+    },
+    status: "active",
+    expiresAt: null  // ✅ 空值，之後你再手動補 Timestamp
+    });
 
-        alert("註冊成功！請點擊下方重新登入");
-        document.getElementById("login-form").style.display = "block";
-        document.getElementById("register-form").style.display = "none";
-    } catch (error) {
-        alert("註冊失敗：" + error.message);
-    }
+    alert("註冊成功！請點擊下方重新登入");
+    document.getElementById("login-form").style.display = "block";
+    document.getElementById("register-form").style.display = "none";
+} catch (error) {
+    alert("註冊失敗：" + error.message);
+}
 });
 
 document.getElementById("forgot-password").addEventListener("click", async () => {
